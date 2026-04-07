@@ -1,17 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using backend.Models;
+﻿using System.Security.Claims;
 using backend.DTO.Auth;
-using backend.Data;
+using backend.Services;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using backend.Services;
-using Microsoft.AspNetCore.Identity;
-using Org.BouncyCastle.Ocsp;
 using Microsoft.Extensions.Caching.Memory;
 
 
@@ -21,54 +13,56 @@ namespace backend.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly DBContext _db;
-        private readonly IEmailSender _emailSender;
+        private readonly IUserCrudService _userService;
         private readonly IMemoryCache _cache;
+        private readonly IEmailSender _emailSender;
+        private readonly TokenService _tokenService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(DBContext db, IEmailSender emailSender, IMemoryCache cache)
+        public AuthController(
+            IUserCrudService userService,
+            IMemoryCache cache,
+            IEmailSender emailSender,
+            TokenService tokenService,
+            ILogger<AuthController> logger)
         {
-            _db = db;
-            _emailSender = emailSender;
+            _userService = userService;
             _cache = cache;
+            _emailSender = emailSender;
+            _tokenService = tokenService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-        { 
+        {
+            _logger.LogInformation("Попытка регистрации: {Email}", request.email);
+
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            
-            var existingUser = await _db.Users
-                .FirstOrDefaultAsync(u => u.email == request.email && !u.deleted);
-
-            if (existingUser != null)
-                return BadRequest(new {error = "Email уже зарегестрирован"});
-
-
-            var passwordHasher = new PasswordHasher<Users>();
-            var hashPass = passwordHasher.HashPassword(null, request.password);
-
-            var user = new Users
             {
-                nickname = request.nickname,
-                email = request.email,
-                password = hashPass,
-                registration_date = DateTime.UtcNow,
-                status = "Buyer"
-            };
+                _logger.LogWarning("Невалидная модель регистрации: {@Errors}", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return BadRequest(ModelState);
+            }
 
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            var existingUser = await _userService.FindByEmailAsync(request.email);
+            if (existingUser != null)
+            {
+                _logger.LogWarning("Email уже зарегистрирован: {Email}", request.email);
+                return BadRequest(new { error = "Email уже зарегестрирован" });
+            }
 
-            var code = GenerateVerificationCode();
-            var cachekey = $"email_verify_{user.email}";
+            var user = await _userService.CreateUserAsync(request.nickname, request.email, request.password);
 
-            _cache.Set(cachekey, code, TimeSpan.FromMinutes(10));
+            var code = _tokenService.GenerateVerificationCode();
+            var cacheKey = $"email_verify_{user.email}";
 
+            _cache.Set(cacheKey, code, TimeSpan.FromMinutes(10));
             _cache.Set($"register_attempt_{user.email}", true, TimeSpan.FromMinutes(1));
 
+            _logger.LogDebug("Код подтверждения сохранён в кэше для {Email}", user.email);
+
             await _emailSender.SendEmailAsync(user.email,
-            "Код подтверждения регистрации",
+                "Код подтверждения регистрации",
                 $@"<html>
                     <body style='font-family: Arial, sans-serif;'>
                         <h2>Привет, {user.nickname}!</h2>
@@ -78,53 +72,60 @@ namespace backend.Controllers
                         <p>Если вы не регистрировались, просто проигнорируйте это письмо.</p>
                     </body>
                    </html>");
-            return Ok(new {message = "Код подтверждения отправлен на email"});            
+
+            _logger.LogInformation("Код подтверждения отправлен на {Email}", user.email);
+            return Ok(new { message = "Код подтверждения отправлен на email" });
         }
 
         [HttpPost("verify-code")]
         public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeRequest request)
         {
+            _logger.LogInformation("Проверка кода для {Email}", request.email);
+
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Невалидная модель верификации");
                 return BadRequest(ModelState);
+            }
 
             var cacheKey = $"email_verify_{request.email}";
-            
-            // Проверяем код в кэше
+
             if (!_cache.TryGetValue(cacheKey, out string? storedCode))
+            {
+                _logger.LogWarning("Код верификации истёк или не найден для {Email}", request.email);
                 return BadRequest(new { error = "Код истёк или не найден. Запросите новый." });
+            }
 
-            // Сравниваем коды
             if (storedCode != request.code)
+            {
+                _logger.LogWarning("Неверный код для {Email}", request.email);
                 return BadRequest(new { error = "Неверный код подтверждения" });
+            }
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.email == request.email && !u.deleted);
-            
+            var user = await _userService.FindByEmailAsync(request.email);
             if (user == null)
+            {
+                _logger.LogError("Пользователь не найден после регистрации: {Email}", request.email);
                 return NotFound(new { error = "Пользователь не найден" });
+            }
 
             user.status = "Buyer";
             user.edited_at = DateTime.UtcNow;
-            
-            await _db.SaveChangesAsync();
 
+            var tokens = await _userService.GenerateTokensAsync(user);
+            await _userService.UpdateRefreshTokenAsync(user, _tokenService.HashToken(tokens.RefreshToken), _tokenService.RefreshTokenExpiresAt);
+
+            _tokenService.SetTokenCookies(Response, tokens.AccessToken, tokens.RefreshToken);
             _cache.Remove(cacheKey);
 
-            var token = GenerateJwtToken(user);
-            var expiresIn = int.Parse(Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRE_MINUTES") ?? "30");
+            _logger.LogInformation("Email подтверждён, токены выданы: {UserId}, {Email}", user.id, user.email);
 
             return Ok(new AuthResponse
             {
-                token = token,
-                expires_at = DateTime.UtcNow.AddMinutes(expiresIn),
-                refresh_token = "",
-                user = new UserDto
-                {
-                    id = user.id,
-                    email = user.email,
-                    nickname = user.nickname,
-                    status = user.status
-                }
+                token = tokens.AccessToken,
+                expires_at = tokens.AccessTokenExpiresAt,
+                refresh_token = tokens.RefreshToken,
+                user = tokens.User
             });
         }
 
@@ -134,9 +135,7 @@ namespace backend.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.email == request.email && !u.deleted);
-            
+            var user = await _userService.FindByEmailAsync(request.email);
             if (user == null)
                 return NotFound(new { error = "Пользователь не найден" });
 
@@ -147,8 +146,7 @@ namespace backend.Controllers
             if (_cache.TryGetValue(rateLimitKey, out _))
                 return BadRequest(new { error = "Подождите 1 минуту перед повторной отправкой" });
 
-            // Генерация нового кода
-            var code = GenerateVerificationCode();
+            var code = _tokenService.GenerateVerificationCode();
             var cacheKey = $"email_verify_{user.email}";
             _cache.Set(cacheKey, code, TimeSpan.FromMinutes(10));
             _cache.Set(rateLimitKey, true, TimeSpan.FromMinutes(1));
@@ -171,87 +169,128 @@ namespace backend.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            _logger.LogInformation("Попытка входа: {Email}", request.email);
+
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Невалидная модель входа");
                 return BadRequest(ModelState);
+            }
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(u => u.email == request.email && !u.deleted);
-            
+            var user = await _userService.FindByEmailAsync(request.email);
             if (user == null)
+            {
+                _logger.LogWarning("Пользователь не найден при входе: {Email}", request.email);
                 return Unauthorized("Неверные учётные данные");
+            }
 
-            var passwordHasher = new PasswordHasher<Users>();
-            var result = passwordHasher.VerifyHashedPassword(user, user.password, request.password);
-            if (result == PasswordVerificationResult.Failed)
+            try
+            {
+                await _userService.VerifyPasswordAsync(user, request.password);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _logger.LogWarning("Неверный пароль для {Email}", request.email);
                 return Unauthorized("Неверные учётные данные");
+            }
 
-            if (user.status != "User")
-                return BadRequest(new { error = "Подтвердите email перед входом" });
+            var tokens = await _userService.GenerateTokensAsync(user);
+            await _userService.UpdateRefreshTokenAsync(user, _tokenService.HashToken(tokens.RefreshToken), _tokenService.RefreshTokenExpiresAt);
 
-            var token = GenerateJwtToken(user);
-            var expiresIn = int.Parse(Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRE_MINUTES") ?? "30");
+            _tokenService.SetTokenCookies(Response, tokens.AccessToken, tokens.RefreshToken);
 
+            _logger.LogInformation("Вход выполнен: {UserId}, {Email}", user.id, user.email);
             return Ok(new AuthResponse
             {
-                token = token,
-                expires_at = DateTime.UtcNow.AddMinutes(expiresIn),
-                refresh_token = "",
-                user = new UserDto
-                {
-                    id = user.id,
-                    email = user.email,
-                    nickname = user.nickname,
-                    status = user.status
-                }
+                token = tokens.AccessToken,
+                expires_at = tokens.AccessTokenExpiresAt,
+                refresh_token = tokens.RefreshToken,
+                user = tokens.User
             });
         }
 
         [HttpGet("me")]
         [Authorize]
-        public IActionResult GetMe()
+        public async Task<IActionResult> GetMe()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var nickname = User.FindFirstValue(ClaimTypes.Name);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return Ok(new UserDto
+            if (!int.TryParse(userIdStr, out var userId))
             {
-                id = int.Parse(userId ?? "0"),
-                email = email ?? string.Empty,
-                nickname = nickname ?? string.Empty,
-                status = "User"
+                _logger.LogWarning("Невалидный user ID в токене: {UserIdStr}", userIdStr);
+                return BadRequest("Невалидный user ID в токене");
+            }
+
+            var user = await _userService.FindByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("Пользователь не найден в БД, UserId: {UserId}", userId);
+                return NotFound("Пользователь не найден");
+            }
+
+            _logger.LogInformation("Данные пользователя возвращены: {UserId}, {Email}", user.id, user.email);
+            return Ok(await _userService.MapToDtoAsync(user));
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            _logger.LogInformation("Запрос обновления токена");
+
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                _logger.LogWarning("Refresh token отсутствует в cookies");
+                return Unauthorized("Refresh token отсутствует");
+            }
+
+            var hashedToken = _tokenService.HashToken(refreshToken);
+            var user = await _userService.FindByRefreshTokenHashAsync(hashedToken);
+
+            if (user == null)
+            {
+                _logger.LogWarning("Невалидный refresh token использован");
+                return Unauthorized("Невалидный refresh token");
+            }
+
+            if (user.refresh_token_expires_at < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Refresh token истёк для пользователя {UserId}", user.id);
+                await _userService.ClearRefreshTokenAsync(user);
+                return Unauthorized("Refresh token истёк");
+            }
+
+            var tokens = await _userService.GenerateTokensAsync(user);
+            await _userService.UpdateRefreshTokenAsync(user, _tokenService.HashToken(tokens.RefreshToken), _tokenService.RefreshTokenExpiresAt);
+
+            _tokenService.SetTokenCookies(Response, tokens.AccessToken, tokens.RefreshToken);
+
+            _logger.LogInformation("Токены обновлены для пользователя {UserId}", user.id);
+            return Ok(new AuthResponse
+            {
+                token = tokens.AccessToken,
+                expires_at = tokens.AccessTokenExpiresAt,
+                refresh_token = tokens.RefreshToken,
+                user = tokens.User
             });
         }
-        #region Auxiliary methods
-        private string GenerateJwtToken(Users user)
-        {
-            var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
-                ?? throw new InvalidOperationException("JWT_SECRET_KEY not set");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expireMinutes = int.Parse(Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRE_MINUTES") ?? "30");
 
-            var claims = new[]
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation("Запрос выхода, UserId: {UserId}", userIdStr);
+
+            if (int.TryParse(userIdStr, out var userId))
             {
-                new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
-                new Claim(ClaimTypes.Email, user.email),
-                new Claim(ClaimTypes.Name, user.nickname),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                var user = await _userService.FindByIdAsync(userId);
+                if (user != null)
+                    await _userService.ClearRefreshTokenAsync(user);
+            }
 
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expireMinutes),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            _tokenService.ClearTokenCookies(Response);
+            return Ok(new { message = "Выход выполнен успешно" });
         }
-
-        private string GenerateVerificationCode()
-        {
-            var random = new Random();
-            return random.Next(0, 1000000).ToString("D6");
-        }
-        #endregion
     }
 }

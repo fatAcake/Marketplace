@@ -2,9 +2,17 @@
 using DotNetEnv;
 using backend.Data;
 using backend.Services;
+using backend.Services.CRUD;
+using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Настраиваем логирование
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -14,9 +22,38 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-// Добавляем Swagger
+// Добавляем Swagger с поддержкой JWT
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Marketplace API", Version = "v1" });
+    
+    // Настройка JWT авторизации в Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Введите JWT токен: eyJhbGci..."
+    });
+    
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference 
+                { 
+                    Type = ReferenceType.SecurityScheme, 
+                    Id = "Bearer" 
+                }
+            },
+            new List<string>()
+        }
+    });
+}); 
 
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseNpgsql(
@@ -24,6 +61,10 @@ builder.Services.AddDbContext<DBContext>(options =>
         ?? throw new InvalidOperationException("CONNECTION_STRING not found")));
 
 builder.Services.AddMemoryCache();
+
+builder.Services.AddSingleton<TokenService>();
+
+builder.Services.AddScoped<IUserCrudService, UserCrudService>();
 
 builder.Services.AddScoped<IEmailSender>(_ =>
     new EmailSender(
@@ -63,13 +104,33 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// CORS 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCookies", policy =>
+    {
+        policy.WithOrigins("http://localhost:5035", "http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Разрешаем cookies
+    });
+});
+
 var app = builder.Build();
 
 // Включаем Swagger только в Development режиме
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Marketplace API v1");
+        // Разрешаем отправку cookies через Swagger UI
+        c.ConfigObject.AdditionalItems = new Dictionary<string, object>
+        {
+            { "withCredentials", true }
+        };
+    });
 }
 
 if (!app.Environment.IsDevelopment())
@@ -81,6 +142,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("AllowCookies");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -89,8 +151,6 @@ if (app.Environment.IsDevelopment())
     app.MapSwagger();
 }
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();

@@ -2,17 +2,17 @@ public class DiscountDto
 {
     public int Id { get; set; }
     public int ProductId { get; set; }
-    public int Size { get; set; } = null!;
-    public DateTimeOffset StartDate { get; set; } = null!;
-    public DateTimeOffset EndDate { get; set; } = null!;
+    public int? Size { get; set; } = null!;
+    public DateTimeOffset? StartDate { get; set; } = null!;
+    public DateTimeOffset? EndDate { get; set; } = null!;
 }
 public class DiscountFullInfo
 {
     #region Discount
     public int DiscountId { get; set; }
-    public int Size { get; set; } = null!;
-    public DateTimeOffset StartDate { get; set; } = null!;
-    public DateTimeOffset EndDate { get; set; } = null!;
+    public int? Size { get; set; } = null!;
+    public DateTimeOffset? StartDate { get; set; } = null!;
+    public DateTimeOffset? EndDate { get; set; } = null!;
     #endregion
     #region Product
     public int ProductId { get; set; }

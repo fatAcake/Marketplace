@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -11,9 +12,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    partial class DBContextModelSnapshot : ModelSnapshot
+    [Migration("20260408051849_add_column_for_products")]
+    partial class add_column_for_products
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,39 +24,6 @@ namespace backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("backend.Models.ProductImage", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
-
-                    b.Property<string>("content_type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("created_at")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<byte[]>("image_data")
-                        .IsRequired()
-                        .HasColumnType("BYTEA");
-
-                    b.Property<int>("order")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("product_id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("product_id");
-
-                    b.ToTable("product_images");
-                });
 
             modelBuilder.Entity("backend.Models.Products", b =>
                 {
@@ -75,6 +45,10 @@ namespace backend.Migrations
 
                     b.Property<DateTime?>("edited_at")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("image")
+                        .IsRequired()
+                        .HasColumnType("BYTEA");
 
                     b.Property<string>("name")
                         .IsRequired()
@@ -152,17 +126,6 @@ namespace backend.Migrations
                         });
                 });
 
-            modelBuilder.Entity("backend.Models.ProductImage", b =>
-                {
-                    b.HasOne("backend.Models.Products", "Product")
-                        .WithMany("Images")
-                        .HasForeignKey("product_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("backend.Models.Products", b =>
                 {
                     b.HasOne("backend.Models.Users", "User")
@@ -172,11 +135,6 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("backend.Models.Products", b =>
-                {
-                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("backend.Models.Users", b =>

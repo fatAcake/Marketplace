@@ -1,0 +1,13 @@
+JWT_SECRET_KEY=you_secret_32_characters
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Email Settings (SMTP)
+SMTP_EMAIL="motravasa5@gmail.com" 
+SMTP_PASSWORD=you_pass
+SMTP_SERVER="smtp.gmail.com"
+SMTP_PORT=587
+
+# Database
+CONNECTION_STRING=Host=Host=localhost;Port=5432;Database=Marketplace;Username=postgres;Password=you_password

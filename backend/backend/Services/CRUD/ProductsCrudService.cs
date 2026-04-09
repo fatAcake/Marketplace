@@ -10,12 +10,14 @@ namespace backend.Services.CRUD
     {
         private readonly DBContext _db;
         private readonly IProductImagesService _productImagesService;
+        private readonly IPriceHistoryService _priceHistoryService;
         private readonly ILogger<ProductsCrudService> _logger;
 
-        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, ILogger<ProductsCrudService> logger)
+        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, IPriceHistoryService priceHistoryService, ILogger<ProductsCrudService> logger)
         {
             _db = db;
             _productImagesService = productImagesService;
+            _priceHistoryService = priceHistoryService;
             _logger = logger;
         }
 
@@ -145,6 +147,50 @@ namespace backend.Services.CRUD
             if (product.user_id != userId)
                 throw new UnauthorizedAccessException("Вы не являетесь владельцем этого продукта");
 
+            // Сохраняем старые значения для истории
+            var oldPrice = dto.Price.HasValue ? (decimal?)product.price : null;
+            var newPrice = dto.Price.HasValue ? (decimal?)dto.Price.Value : null;
+
+            // Получаем текущую активную скидку
+            var currentDiscount = await _db.Discounts
+                .Where(d => d.product_id == product.id && !d.deleted)
+                .OrderByDescending(d => d.created_at)
+                .FirstOrDefaultAsync();
+
+            var oldDiscount = currentDiscount?.size;
+
+            // Определяем новый размер скидки
+            decimal? newDiscount = null;
+            bool discountChanged = false;
+
+            if (dto.DiscountSize.HasValue || dto.DiscountStartDate.HasValue || dto.DiscountEndDate.HasValue)
+            {
+                discountChanged = true;
+                newDiscount = dto.DiscountSize ?? currentDiscount?.size;
+
+                // Обновляем или создаём скидку
+                if (currentDiscount != null)
+                {
+                    currentDiscount.size = dto.DiscountSize ?? currentDiscount.size;
+                    currentDiscount.start_date = dto.DiscountStartDate?.UtcDateTime ?? currentDiscount.start_date;
+                    currentDiscount.end_date = dto.DiscountEndDate?.UtcDateTime ?? currentDiscount.end_date;
+                    currentDiscount.edited_at = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Создаём новую скидку
+                    var newDiscountEntity = new Discount
+                    {
+                        product_id = product.id,
+                        size = dto.DiscountSize ?? 0,
+                        start_date = dto.DiscountStartDate?.UtcDateTime ?? DateTime.UtcNow,
+                        end_date = dto.DiscountEndDate?.UtcDateTime ?? DateTime.UtcNow.AddDays(30),
+                        created_at = DateTime.UtcNow
+                    };
+                    _db.Discounts.Add(newDiscountEntity);
+                }
+            }
+
             // Обновляем только переданные поля
             if (!string.IsNullOrEmpty(dto.Name))
                 product.name = dto.Name;
@@ -158,6 +204,19 @@ namespace backend.Services.CRUD
             product.edited_at = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
+
+            // Записываем изменение цены и/или скидки в историю
+            if (dto.Price.HasValue || discountChanged)
+            {
+                await _priceHistoryService.RecordPriceChangeAsync(
+                    product.id,
+                    oldPrice,
+                    newPrice,
+                    oldDiscount,
+                    discountChanged ? newDiscount : oldDiscount,
+                    userId
+                );
+            }
 
             _logger.LogInformation("Продукт обновлён: {ProductId}, пользователь: {UserId}", id, userId);
 

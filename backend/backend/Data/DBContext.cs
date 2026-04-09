@@ -10,6 +10,8 @@ namespace backend.Data
         public virtual DbSet<Users> Users { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<PriceDiscountHistory> PriceDiscountHistories { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +28,12 @@ namespace backend.Data
                 .HasOne(pi => pi.Product)
                 .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.product_id)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+             modelBuilder.Entity<PriceDiscountHistory>()
+                .HasOne(h => h.Product)
+                .WithMany(p => p.PriceDiscountHistories)
+                .HasForeignKey(h => h.product_id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);

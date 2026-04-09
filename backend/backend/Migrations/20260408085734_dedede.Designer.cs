@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20260408060041_create_products_images_table")]
-    partial class create_products_images_table
+    [Migration("20260408085734_dedede")]
+    partial class dedede
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,45 @@ namespace backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ChangedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("NewDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NewPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OldDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OldPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Productsid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Productsid");
+
+                    b.ToTable("PriceDiscountHistory");
+                });
 
             modelBuilder.Entity("backend.Models.ProductImage", b =>
                 {
@@ -78,10 +117,6 @@ namespace backend.Migrations
 
                     b.Property<DateTime?>("edited_at")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<byte[]>("image")
-                        .IsRequired()
-                        .HasColumnType("BYTEA");
 
                     b.Property<string>("name")
                         .IsRequired()
@@ -157,6 +192,17 @@ namespace backend.Migrations
                         {
                             t.HasCheckConstraint("CK_users_status", "status in ('Buyer', 'Admin', 'Saller')");
                         });
+                });
+
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
+                {
+                    b.HasOne("backend.Models.Products", "Products")
+                        .WithMany()
+                        .HasForeignKey("Productsid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("backend.Models.ProductImage", b =>

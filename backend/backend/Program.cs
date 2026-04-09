@@ -65,6 +65,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddScoped<IUserCrudService, UserCrudService>();
+builder.Services.AddScoped<IPriceHistoryService, PriceHistoryService>();
 builder.Services.AddScoped<IProductsCrudService, ProductsCrudService>();
 builder.Services.AddScoped<IProductImagesService, ProductImagesService>();
 

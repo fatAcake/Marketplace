@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20260408061104_delete_column_from_products")]
-    partial class delete_column_from_products
+    [Migration("20260408083955_DadAdedede")]
+    partial class DadAdedede
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,79 +25,66 @@ namespace backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("backend.Models.ProductImage", b =>
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("content_type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("created_at")
+                    b.Property<DateTime>("ChangedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<byte[]>("image_data")
-                        .IsRequired()
-                        .HasColumnType("BYTEA");
-
-                    b.Property<int>("order")
+                    b.Property<int>("ChangedBy")
                         .HasColumnType("integer");
 
-                    b.Property<int>("product_id")
+                    b.Property<decimal>("NewDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NewPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OldDiscount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("OldPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("product_id");
+                    b.HasIndex("ProductId");
 
-                    b.ToTable("product_images");
+                    b.ToTable("PriceDiscountHistory");
                 });
 
-            modelBuilder.Entity("backend.Models.Products", b =>
+            modelBuilder.Entity("backend.Models.Product", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("deleted")
-                        .HasColumnType("boolean");
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("deleted_at")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("description")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("edited_at")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<float>("price")
-                        .HasColumnType("real");
-
-                    b.Property<int>("quantity")
+                    b.Property<int>("SellerId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("integer");
+                    b.HasKey("Id");
 
-                    b.HasKey("id");
-
-                    b.HasIndex("user_id");
-
-                    b.ToTable("products");
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("backend.Models.Users", b =>
@@ -155,36 +142,20 @@ namespace backend.Migrations
                         });
                 });
 
-            modelBuilder.Entity("backend.Models.ProductImage", b =>
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
                 {
-                    b.HasOne("backend.Models.Products", "Product")
-                        .WithMany("Images")
-                        .HasForeignKey("product_id")
+                    b.HasOne("backend.Models.Product", "Product")
+                        .WithMany("PriceDiscountHistories")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("backend.Models.Products", b =>
+            modelBuilder.Entity("backend.Models.Product", b =>
                 {
-                    b.HasOne("backend.Models.Users", "User")
-                        .WithMany("Products")
-                        .HasForeignKey("user_id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("backend.Models.Products", b =>
-                {
-                    b.Navigation("Images");
-                });
-
-            modelBuilder.Entity("backend.Models.Users", b =>
-                {
-                    b.Navigation("Products");
+                    b.Navigation("PriceDiscountHistories");
                 });
 #pragma warning restore 612, 618
         }

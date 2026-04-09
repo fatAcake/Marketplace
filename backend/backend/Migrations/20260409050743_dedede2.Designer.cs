@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20260408051849_add_column_for_products")]
-    partial class add_column_for_products
+    [Migration("20260409050743_dedede2")]
+    partial class dedede2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,77 @@ namespace backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime>("changed_at")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("changed_by")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("new_discount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("new_price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("old_discount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("old_price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("product_id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("changed_by");
+
+                    b.HasIndex("product_id");
+
+                    b.ToTable("price_discount_history");
+                });
+
+            modelBuilder.Entity("backend.Models.ProductImage", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<string>("content_type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("created_at")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("image_data")
+                        .IsRequired()
+                        .HasColumnType("BYTEA");
+
+                    b.Property<int>("order")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("product_id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("product_id");
+
+                    b.ToTable("product_images");
+                });
 
             modelBuilder.Entity("backend.Models.Products", b =>
                 {
@@ -45,10 +116,6 @@ namespace backend.Migrations
 
                     b.Property<DateTime?>("edited_at")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<byte[]>("image")
-                        .IsRequired()
-                        .HasColumnType("BYTEA");
 
                     b.Property<string>("name")
                         .IsRequired()
@@ -126,6 +193,34 @@ namespace backend.Migrations
                         });
                 });
 
+            modelBuilder.Entity("backend.Models.PriceDiscountHistory", b =>
+                {
+                    b.HasOne("backend.Models.Users", "ChangedByUser")
+                        .WithMany()
+                        .HasForeignKey("changed_by");
+
+                    b.HasOne("backend.Models.Products", "Product")
+                        .WithMany("PriceDiscountHistories")
+                        .HasForeignKey("product_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChangedByUser");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("backend.Models.ProductImage", b =>
+                {
+                    b.HasOne("backend.Models.Products", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("product_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("backend.Models.Products", b =>
                 {
                     b.HasOne("backend.Models.Users", "User")
@@ -135,6 +230,13 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("backend.Models.Products", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("PriceDiscountHistories");
                 });
 
             modelBuilder.Entity("backend.Models.Users", b =>

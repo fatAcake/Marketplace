@@ -10,6 +10,7 @@ namespace backend.Data
         public virtual DbSet<Users> Users { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<Discount> Discounts { get; set; }
         public virtual DbSet<PriceDiscountHistory> PriceDiscountHistories { get; set; }
 
 

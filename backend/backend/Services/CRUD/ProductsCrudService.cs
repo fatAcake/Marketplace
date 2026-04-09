@@ -9,13 +9,15 @@ namespace backend.Services.CRUD
     public class ProductsCrudService : IProductsCrudService
     {
         private readonly DBContext _db;
+        private readonly IPriceHistoryService _priceHistoryService;
         private readonly IProductImagesService _productImagesService;
         private readonly ILogger<ProductsCrudService> _logger;
 
-        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, ILogger<ProductsCrudService> logger)
+        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, IPriceHistoryService priceHistoryService, ILogger<ProductsCrudService> logger)
         {
             _db = db;
             _productImagesService = productImagesService;
+            _priceHistoryService = priceHistoryService;
             _logger = logger;
         }
 
@@ -145,7 +147,11 @@ namespace backend.Services.CRUD
             if (product.user_id != userId)
                 throw new UnauthorizedAccessException("Вы не являетесь владельцем этого продукта");
 
-            // Обновляем только переданные поля
+            // Сохраняем старую цену
+            var oldPrice = (decimal)product.price;
+            var newPrice = dto.Price.HasValue ? (decimal)dto.Price.Value : oldPrice;
+
+            // Обновляем поля
             if (!string.IsNullOrEmpty(dto.Name))
                 product.name = dto.Name;
             if (dto.Price.HasValue)
@@ -158,6 +164,22 @@ namespace backend.Services.CRUD
             product.edited_at = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
+
+            // Записываем историю изменения цены (скидка не менялась)
+            if (oldPrice != newPrice)
+            {
+                await _priceHistoryService.RecordPriceChangeAsync(
+                    id,
+                    oldPrice,
+                    newPrice,
+                    null, // скидка не менялась
+                    null,
+                    userId
+                );
+
+                _logger.LogInformation("История цены сохранена для продукта {ProductId}: {OldPrice} -> {NewPrice}",
+                    id, oldPrice, newPrice);
+            }
 
             _logger.LogInformation("Продукт обновлён: {ProductId}, пользователь: {UserId}", id, userId);
 

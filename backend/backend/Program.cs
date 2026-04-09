@@ -68,7 +68,7 @@ builder.Services.AddScoped<IUserCrudService, UserCrudService>();
 builder.Services.AddScoped<IPriceHistoryService, PriceHistoryService>();
 builder.Services.AddScoped<IProductsCrudService, ProductsCrudService>();
 builder.Services.AddScoped<IProductImagesService, ProductImagesService>();
-
+builder.Services.AddScoped<IDiscountsCrudService, DiscountsCrudService>();
 builder.Services.AddScoped<IEmailSender>(_ =>
     new EmailSender(
         smtpServer: Environment.GetEnvironmentVariable("SMTP_SERVER")

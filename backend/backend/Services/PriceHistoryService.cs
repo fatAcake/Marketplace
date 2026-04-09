@@ -40,6 +40,53 @@ namespace backend.Services
             return history;
         }
 
+        public async Task<PriceDiscountHistory?> RecordPriceChangeAsync(
+            int productId,
+            decimal? oldPrice,
+            decimal? newPrice,
+            decimal? oldDiscount,
+            decimal? newDiscount,
+            int changedByUserId)
+        {
+            // Если ничего не изменилось — не пишем историю
+            if (oldPrice == newPrice && oldDiscount == newDiscount)
+                return null;
+
+            // Получаем текущие значения из БД, если не переданы
+            if (!oldPrice.HasValue || !oldDiscount.HasValue)
+            {
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.id == productId);
+                
+                if (product != null)
+                {
+                    oldPrice ??= (decimal)product.price;
+                }
+
+                var activeDiscount = await _context.Discounts
+                    .Where(d => d.product_id == productId && !d.deleted)
+                    .OrderByDescending(d => d.created_at)
+                    .FirstOrDefaultAsync();
+                
+                oldDiscount ??= activeDiscount?.size ?? 0;
+            }
+
+            var history = new PriceDiscountHistory
+            {
+                product_id = productId,
+                old_price = oldPrice ?? 0,
+                new_price = newPrice ?? oldPrice ?? 0,
+                old_discount = oldDiscount ?? 0,
+                new_discount = newDiscount ?? oldDiscount ?? 0,
+                changed_at = DateTime.UtcNow,
+                changed_by = changedByUserId
+            };
+
+            _context.PriceDiscountHistories.Add(history);
+            await _context.SaveChangesAsync();
+            return history;
+        }
+
         public async Task<bool> DeleteByIdAsync(int historyId)
         {
             var history = await _context.PriceDiscountHistories.FindAsync(historyId);

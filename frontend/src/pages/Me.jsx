@@ -41,13 +41,6 @@ export function MePage() {
             </div>
           </div>
         </div>
-
-        <div className="card">
-          <div className="muted">Access token (localStorage)</div>
-          <div className="mono" style={{ marginTop: 10 }}>
-            {token ? token : '—'}
-          </div>
-        </div>
       </div>
 
       <div className="row" style={{ marginTop: 14 }}>
@@ -70,27 +63,7 @@ export function MePage() {
           Обновить
         </button>
 
-        <button
-          className="btn"
-          disabled={busy}
-          onClick={async () => {
-            setError('')
-            setBusy(true)
-            try {
-              const res = await refresh()
-              if (res?.token) {
-                const me = await authApi.me(res.token)
-                setUser(me)
-              }
-            } catch (e) {
-              setError(e?.message || 'Не удалось обновить токен')
-            } finally {
-              setBusy(false)
-            }
-          }}
-        >
-          Refresh
-        </button>
+  
 
         <button
           className="btn"

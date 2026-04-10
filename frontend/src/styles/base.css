@@ -1,0 +1,196 @@
+.container {
+  width: min(860px, 100%);
+  margin: 0 auto;
+}
+
+.topbar {
+  margin-bottom: 16px;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  font-weight: 700;
+  color: inherit;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.page {
+  padding: 0;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 860px) {
+  .grid.two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: #555;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.text-navy {
+  color: var(--navy);
+}
+
+/* — Кнопки — */
+.btn {
+  appearance: none;
+  border: 1px solid #ccc;
+  background: #f6f6f6;
+  color: #111;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn:hover {
+  background: #eee;
+}
+
+.btn:active {
+  transform: none;
+}
+
+.btn.primary {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.btn-lg {
+  padding: 12px 32px;
+  font-size: 16px;
+}
+
+.btn-outline {
+  background: transparent !important;
+  border-color: var(--navy) !important;
+  color: var(--navy) !important;
+}
+
+.btn-outline:hover {
+  background: var(--blue-gray) !important;
+}
+
+.btn-primary-navy {
+  background: var(--navy) !important;
+  border-color: var(--navy) !important;
+  color: #fff !important;
+}
+
+.btn-primary-navy:hover {
+  opacity: 0.9;
+}
+
+.btn-danger-outline {
+  background: transparent !important;
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
+}
+
+.btn-danger-outline:hover {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
+.btn-back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  background: transparent !important;
+  border-color: var(--navy) !important;
+  color: var(--navy) !important;
+  text-decoration: none;
+}
+
+.btn-back {
+  background: transparent !important;
+  border-color: var(--navy) !important;
+  color: var(--navy) !important;
+  margin-bottom: 16px;
+}
+
+/* — Формы — */
+label {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #111;
+  outline: none;
+}
+
+input:focus {
+  border-color: #0b57d0;
+}
+
+/* — Алерты — */
+.alert {
+  border-radius: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+.alert.error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.alert.ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.me-1 {
+  margin-right: 4px;
+}

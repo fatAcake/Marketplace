@@ -43,43 +43,93 @@ namespace backend.Services.CRUD
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
-            return await _db.Products
+            var product = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.User)
                 .Where(p => !p.deleted)
-                .Select(p => new ProductDto
-                {
-                    Id = p.id,
-                    Name = p.name,
-                    Price = p.price,
-                    Quantity = p.quantity,
-                    Description = p.description,
-                    UserId = p.user_id,
-                    SellerNickName = p.User.nickname,
-                    SellerEmail = p.User.email
-                })
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.id == id);
+
+            if (product == null) return null;
+
+            // Проверяем активную скидку
+            var now = DateTime.UtcNow;
+            var activeDiscount = await _db.Discounts
+                .AsNoTracking()
+                .Where(d => d.product_id == product.id
+                    && !d.deleted
+                    && (d.start_date == null || d.start_date <= now)
+                    && (d.end_date == null || d.end_date >= now))
+                .FirstOrDefaultAsync();
+
+            decimal? discountSize = activeDiscount?.size;
+            float? discountedPrice = null;
+            if (discountSize.HasValue && discountSize > 0)
+            {
+                discountedPrice = (float)(product.price * (1 - (double)discountSize.Value / 100));
+            }
+
+            return new ProductDto
+            {
+                Id = product.id,
+                Name = product.name,
+                Price = product.price,
+                Quantity = product.quantity,
+                Description = product.description,
+                UserId = product.user_id,
+                SellerNickName = product.User.nickname,
+                SellerEmail = product.User.email,
+                DiscountSize = discountSize,
+                DiscountStartDate = activeDiscount?.start_date,
+                DiscountEndDate = activeDiscount?.end_date,
+                DiscountedPrice = discountedPrice
+            };
         }
 
         public async Task<List<UserProductInfo>> GetProductsByUserIdAsync(int userId)
         {
-            return await _db.Products
+            var products = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.User)
                 .Where(p => !p.deleted && p.user_id == userId)
-                .Select(p => new UserProductInfo
+                .ToListAsync();
+
+            var now = DateTime.UtcNow;
+            var result = new List<UserProductInfo>();
+
+            foreach (var p in products)
+            {
+                var activeDiscount = await _db.Discounts
+                    .AsNoTracking()
+                    .Where(d => d.product_id == p.id
+                        && !d.deleted
+                        && (d.start_date == null || d.start_date <= now)
+                        && (d.end_date == null || d.end_date >= now))
+                    .FirstOrDefaultAsync();
+
+                decimal? discountSize = activeDiscount?.size;
+                float? discountedPrice = null;
+                if (discountSize.HasValue && discountSize > 0)
+                {
+                    discountedPrice = (float)(p.price * (1 - (double)discountSize.Value / 100));
+                }
+
+                result.Add(new UserProductInfo
                 {
                     ProductId = p.id,
                     Name = p.name,
                     Price = p.price,
                     Quantity = p.quantity,
                     Description = p.description,
+                    DiscountSize = discountSize,
+                    DiscountedPrice = discountedPrice,
                     SellerUserId = p.user_id,
                     NickName = p.User.nickname,
                     Email = p.User.email,
                     SellerStatus = p.User.status
-                })
-                .ToListAsync();
+                });
+            }
+
+            return result;
         }
 
         public async Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId)

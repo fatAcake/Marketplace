@@ -55,3 +55,14 @@ nunit-*.xml
 .vs
 backend/backend/appsettings.json
 backend/backend/.env
+
+# React / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.env.local
+frontend/.env.*.local
+frontend/eslint.json
+frontend/stats.json
+frontend/package-lock.json

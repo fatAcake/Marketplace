@@ -11,6 +11,10 @@ public class ProductDto
     public int UserId { get; set; }
     public string SellerNickName { get; set; } = null!;
     public string SellerEmail { get; set; } = null!;
+    public decimal? DiscountSize { get; set; }
+    public DateTimeOffset? DiscountStartDate { get; set; }
+    public DateTimeOffset? DiscountEndDate { get; set; }
+    public float? DiscountedPrice { get; set; }
 }
 
 public class CreateProductDto
@@ -63,6 +67,8 @@ public class UserProductInfo
     public float Price { get; set; }
     public int Quantity { get; set; }
     public string Description { get; set; } = null!;
+    public decimal? DiscountSize { get; set; }
+    public float? DiscountedPrice { get; set; }
     #endregion
     #region Seller User
     public int SellerUserId { get; set; }

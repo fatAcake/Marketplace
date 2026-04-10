@@ -65,6 +65,12 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddScoped<IUserCrudService, UserCrudService>();
+builder.Services.AddScoped<IProductsCrudService, ProductsCrudService>();
+builder.Services.AddScoped<IProductImagesService, ProductImagesService>();
+builder.Services.AddScoped<IPriceHistoryService, PriceHistoryService>();
+builder.Services.AddScoped<IDiscountsCrudService, DiscountsCrudService>();
+builder.Services.AddScoped<IOrdersCrudService, OrdersCrudService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 builder.Services.AddScoped<IEmailSender>(_ =>
     new EmailSender(

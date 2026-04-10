@@ -42,5 +42,7 @@ namespace backend.Models
 
         [Column(TypeName = "timestamp with time zone")]
         public DateTime? refresh_token_expires_at { get; set; }
+
+        public ICollection<Products> Products { get; set; } = new List<Products>();
     }
 }

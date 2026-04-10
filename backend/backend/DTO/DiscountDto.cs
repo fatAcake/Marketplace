@@ -2,15 +2,31 @@ public class DiscountDto
 {
     public int Id { get; set; }
     public int ProductId { get; set; }
-    public int? Size { get; set; } = null!;
+    public decimal? Size { get; set; } = null!;
     public DateTimeOffset? StartDate { get; set; } = null!;
     public DateTimeOffset? EndDate { get; set; } = null!;
 }
+
+public class DiscountCreateDto
+{
+    public int ProductId { get; set; }
+    public decimal? Size { get; set; }
+    public DateTimeOffset? StartDate { get; set; }
+    public DateTimeOffset? EndDate { get; set; }
+}
+
+public class DiscountUpdateDto
+{
+    public decimal? Size { get; set; }
+    public DateTimeOffset? StartDate { get; set; }
+    public DateTimeOffset? EndDate { get; set; }
+}
+
 public class DiscountFullInfo
 {
     #region Discount
     public int DiscountId { get; set; }
-    public int? Size { get; set; } = null!;
+    public decimal? Size { get; set; } = null!;
     public DateTimeOffset? StartDate { get; set; } = null!;
     public DateTimeOffset? EndDate { get; set; } = null!;
     #endregion
@@ -23,7 +39,7 @@ public class DiscountFullInfo
     public byte[] FileData { get; set; }
     #endregion
     #region User
-    
+
     public int UserId { get; set; }
     public string NickName { get; set; }
     public string Email { get; set; }

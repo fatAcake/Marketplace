@@ -19,13 +19,6 @@ namespace backend.Controllers
             _logger = logger;
         }
 
-        private int GetCurrentUserId()
-        {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
-                throw new UnauthorizedAccessException("User ID not found in token");
-            return userId;
-        }
 
         [HttpPost]
         [Authorize]
@@ -36,7 +29,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var discount = await _discountsService.CreateDiscountAsync(dto, userId);
                 return CreatedAtAction(nameof(GetDiscount), new { id = discount.Id }, discount);
             }
@@ -116,7 +109,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var discount = await _discountsService.UpdateDiscountAsync(id, dto, userId);
 
                 if (discount == null)
@@ -145,7 +138,7 @@ namespace backend.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var result = await _discountsService.DeleteDiscountAsync(id, userId);
 
                 if (!result)

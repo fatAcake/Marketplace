@@ -124,6 +124,25 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Автоматическое применение миграций при запуске
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DBContext>();
+
+    // Проверяем, существует ли база данных
+    var canConnect = await dbContext.Database.CanConnectAsync();
+
+    if (!canConnect)
+    {
+        app.Logger.LogInformation("База данных не найдена. Применяю миграции...");
+
+        // Применяем все миграции
+        await dbContext.Database.MigrateAsync();
+
+        app.Logger.LogInformation("Миграции успешно применены.");
+    }
+}
+
 // Включаем Swagger только в Development режиме
 if (app.Environment.IsDevelopment())
 {

@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using backend.DTO;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -18,14 +17,7 @@ namespace backend.Controllers
             _priceHistoryService = priceHistoryService;
             _logger = logger;
         }
-
-        private int GetCurrentUserId()
-        {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
-                throw new UnauthorizedAccessException("User ID not found in token");
-            return userId;
-        }
+        
 
         [HttpGet]
         [AllowAnonymous]
@@ -52,7 +44,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var historyEntry = await _priceHistoryService.AddPriceHistoryAsync(
                     productId,
                     dto.NewPrice,

@@ -58,7 +58,6 @@ export async function apiFetchMultipart(path, { method = 'POST', token, formData
 
   const headers = {}
   if (token) headers.Authorization = `Bearer ${token}`
-  // Content-Type НЕ ставим — браузер сам установит boundary для multipart
 
   const res = await fetch(url, {
     method,

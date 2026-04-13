@@ -66,7 +66,7 @@
 }
 
 .text-navy {
-  color: var(--navy);
+  color: #111;
 }
 
 /* — Кнопки — */
@@ -107,17 +107,17 @@
 
 .btn-outline {
   background: transparent !important;
-  border-color: var(--navy) !important;
-  color: var(--navy) !important;
+  border-color: #111 !important;
+  color: #111 !important;
 }
 
 .btn-outline:hover {
-  background: var(--blue-gray) !important;
+  background: var(--gray-400) !important;
 }
 
 .btn-primary-navy {
-  background: var(--navy) !important;
-  border-color: var(--navy) !important;
+  background: #111 !important;
+  border-color: #111 !important;
   color: #fff !important;
 }
 
@@ -136,19 +136,30 @@
   color: #fff !important;
 }
 
+.btn-edit {
+  background: transparent !important;
+  border-color: #0b57d0 !important;
+  color: #0b57d0 !important;
+}
+
+.btn-edit:hover {
+  background: #0b57d0 !important;
+  color: #fff !important;
+}
+
 .btn-back-link {
   display: inline-block;
   margin-bottom: 12px;
   background: transparent !important;
-  border-color: var(--navy) !important;
-  color: var(--navy) !important;
+  border-color: #111 !important;
+  color: #111 !important;
   text-decoration: none;
 }
 
 .btn-back {
   background: transparent !important;
-  border-color: var(--navy) !important;
-  color: var(--navy) !important;
+  border-color: #111 !important;
+  color: #111 !important;
   margin-bottom: 16px;
 }
 

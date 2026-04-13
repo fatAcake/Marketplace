@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as analyticsApi from '../api/analytics.js'
 
@@ -16,19 +16,17 @@ function normalize(p) {
     description: p.description ?? p.Description ?? '',
     userId: p.userId ?? p.UserId ?? p.sellerUserId ?? p.SellerUserId,
     sellerNickName: p.sellerNickName ?? p.SellerNickName ?? p.nickName ?? p.NickName ?? '',
-    discountSize: p.discountSize ?? p.DiscountSize,
-    discountedPrice: p.discountedPrice ?? p.DiscountedPrice,
+    discountSize: p.discountSize ?? p.DiscountSize ?? null,
+    discountedPrice: p.discountedPrice ?? p.DiscountedPrice ?? null,
   }
 }
 
 /**
- * Карточка продукта с превью изображения и выпадающим меню (⋮).
+ * Карточка продукта с превью изображения.
  */
-export function ProductCard({ product: rawProduct, token, onDelete }) {
+export function ProductCard({ product: rawProduct, token }) {
   const product = normalize(rawProduct)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
-  const menuRef = useRef(null)
 
   useEffect(() => {
     async function fetchImage() {
@@ -39,46 +37,42 @@ export function ProductCard({ product: rawProduct, token, onDelete }) {
           setImageUrl(`${API_BASE}/api/products/${product.id}/images/${first.id}`)
         }
       } catch {
-        // нет изображений — placeholder
       }
     }
     fetchImage()
   }, [product.id, token])
 
-  useEffect(() => {
-    function handleClick(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false)
-      }
-    }
-    if (menuOpen) document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [menuOpen])
+  const isDiscountActive = (() => {
+    const discountSize = product.discountSize
+    const discountedPrice = product.discountedPrice
+    return discountSize != null && discountSize !== 0 && discountedPrice != null
+  })()
+
+  const displayDiscountedPrice = isDiscountActive ? product.discountedPrice : null
+  const displayDiscountSize = isDiscountActive ? product.discountSize : null
 
   return (
     <div className="product-card">
-      {/* Изображение / placeholder */}
       <Link to={`/products/${product.id}`} className="product-card-image-link">
         {imageUrl ? (
           <img className="product-card-img" src={imageUrl} alt={product.name} />
         ) : (
           <div className="product-card-placeholder">
-            <i className="bi bi-image" style={{ fontSize: 48, color: 'var(--blue-gray)' }}></i>
+            <i className="bi bi-image" style={{ fontSize: 48, color: 'var(--gray-400)' }}></i>
           </div>
         )}
       </Link>
 
-      {/* Инфо */}
       <div className="product-card-body">
         <Link to={`/products/${product.id}`} className="product-card-title">
           {product.name}
         </Link>
         <div className="product-card-price">
-          {product.discountedPrice != null ? (
+          {displayDiscountedPrice != null ? (
             <>
-              <span className="pc-price-current">{product.discountedPrice} ₽</span>
+              <span className="pc-price-current">{displayDiscountedPrice} ₽</span>
               <span className="pc-price-old">{product.price} ₽</span>
-              <span className="pc-discount-badge">−{product.discountSize}%</span>
+              <span className="pc-discount-badge">−{displayDiscountSize}%</span>
             </>
           ) : (
             <span>{product.price} ₽</span>
@@ -86,30 +80,6 @@ export function ProductCard({ product: rawProduct, token, onDelete }) {
         </div>
         <div className="product-card-qty">
           В наличии: {product.quantity} шт.
-        </div>
-
-        {/* Меню действий */}
-        <div className="product-card-menu" ref={menuRef}>
-          <button className="product-card-menu-btn" onClick={() => setMenuOpen((v) => !v)}>
-            <i className="bi bi-three-dots"></i>
-          </button>
-          {menuOpen && (
-            <div className="product-card-menu-dropdown">
-              <Link
-                to={`/products/${product.id}`}
-                className="product-card-menu-item"
-                onClick={() => setMenuOpen(false)}
-              >
-                <i className="bi bi-eye me-1"></i>Подробнее
-              </Link>
-              <button
-                className="product-card-menu-item product-card-menu-item--danger"
-                onClick={() => { onDelete(product.id); setMenuOpen(false) }}
-              >
-                <i className="bi bi-trash me-1"></i>Удалить
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

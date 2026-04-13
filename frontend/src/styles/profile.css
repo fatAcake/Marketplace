@@ -11,8 +11,8 @@
   gap: 20px;
   padding: 24px;
   border-radius: 16px;
-  background: var(--pink-light);
-  border: 1px solid var(--pink-medium);
+  background: var(--gray-200);
+  border: 1px solid var(--gray-300);
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
@@ -21,7 +21,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--navy);
+  background: #111;
   color: #fff;
   display: flex;
   align-items: center;
@@ -39,12 +39,12 @@
 .profile-name {
   margin: 0;
   font-size: 22px;
-  color: var(--navy);
+  color: #111;
 }
 
 .profile-email {
   margin: 2px 0 6px;
-  color: var(--navy);
+  color: #111;
   opacity: 0.7;
   font-size: 14px;
 }
@@ -55,9 +55,9 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  background: var(--beige);
-  color: var(--navy);
-  border: 1px solid var(--blue-gray);
+  background: var(--gray-100);
+  color: #111;
+  border: 1px solid var(--gray-400);
 }
 
 .profile-header-actions {
@@ -75,8 +75,8 @@
 }
 
 .profile-stat-card {
-  background: var(--beige);
-  border: 1px solid var(--blue-gray);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-400);
   border-radius: 12px;
   padding: 18px 16px;
   text-align: center;
@@ -86,13 +86,13 @@
 
 .profile-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(47, 65, 86, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .profile-stat-card--clickable {
   cursor: pointer;
-  background: var(--pink-medium);
-  border-color: var(--pink-medium);
+  background: var(--gray-300);
+  border-color: var(--gray-300);
 }
 
 .profile-stat-icon {
@@ -103,12 +103,12 @@
 .profile-stat-value {
   font-size: 22px;
   font-weight: 700;
-  color: var(--navy);
+  color: #111;
 }
 
 .profile-stat-label {
   font-size: 12px;
-  color: var(--navy);
+  color: #111;
   opacity: 0.7;
   margin-top: 2px;
 }

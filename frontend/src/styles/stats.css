@@ -8,20 +8,20 @@
 .stats-kpi-card {
   text-align: center;
   padding: 16px;
-  background: var(--beige);
+  background: var(--gray-100);
   border-radius: 10px;
-  border: 1px solid var(--blue-gray);
+  border: 1px solid var(--gray-400);
 }
 
 .stats-kpi-value {
   font-size: 22px;
   font-weight: 700;
-  color: var(--navy);
+  color: #111;
 }
 
 .stats-kpi-label {
   font-size: 12px;
-  color: var(--navy);
+  color: #111;
   opacity: 0.6;
   margin-top: 4px;
 }
@@ -33,14 +33,14 @@
 
 .stats-chart-section h4 {
   margin: 0 0 12px;
-  color: var(--navy);
+  color: #111;
   font-size: 16px;
 }
 
 .chart-svg {
-  background: var(--beige);
+  background: var(--gray-100);
   border-radius: 10px;
-  border: 1px solid var(--blue-gray);
+  border: 1px solid var(--gray-400);
   padding: 8px;
 }
 
@@ -54,8 +54,8 @@
 .stats-table th {
   text-align: left;
   padding: 8px 10px;
-  background: var(--blue-gray);
-  color: var(--navy);
+  background: var(--gray-400);
+  color: #111;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
@@ -64,8 +64,8 @@
 
 .stats-table td {
   padding: 8px 10px;
-  border-bottom: 1px solid var(--beige);
-  color: var(--navy);
+  border-bottom: 1px solid var(--gray-100);
+  color: #111;
 }
 
 .stats-table tr:last-child td {
@@ -73,14 +73,14 @@
 }
 
 .stats-table tr:hover td {
-  background: var(--beige);
+  background: var(--gray-100);
 }
 
 /* Список товаров (tab «Товары») */
 .stats-top-products h4,
 .stats-history-table h4 {
   margin: 0 0 12px;
-  color: var(--navy);
+  color: #111;
   font-size: 16px;
 }
 
@@ -96,8 +96,8 @@
   align-items: flex-start;
   gap: 2px;
   padding: 14px 16px;
-  background: var(--beige);
-  border: 1px solid var(--blue-gray);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-400);
   border-radius: 10px;
   cursor: pointer;
   text-align: left;
@@ -105,19 +105,19 @@
 }
 
 .stats-product-item:hover {
-  background: var(--pink-light);
-  border-color: var(--pink-medium);
+  background: var(--gray-200);
+  border-color: var(--gray-300);
 }
 
 .stats-product-name {
   font-weight: 600;
-  color: var(--navy);
+  color: #111;
   font-size: 15px;
 }
 
 .stats-product-meta {
   font-size: 12px;
-  color: var(--navy);
+  color: #111;
   opacity: 0.6;
 }
 
@@ -140,7 +140,7 @@
   min-width: 100px;
   max-width: 140px;
   font-size: 13px;
-  color: var(--navy);
+  color: #111;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -151,7 +151,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--beige);
+  background: var(--gray-100);
   border-radius: 6px;
   padding: 4px 8px;
   min-height: 28px;
@@ -167,6 +167,6 @@
 .bar-value {
   font-size: 13px;
   font-weight: 600;
-  color: var(--navy);
+  color: #111;
   white-space: nowrap;
 }

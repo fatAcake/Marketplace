@@ -7,7 +7,7 @@ import { useMemo } from 'react'
  * @param {string}   color  — цвет линии (default: --navy)
  * @param {string}   label  — подпись оси Y
  */
-export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
+export function SimpleChart({ data, color = '#111', label = '' }) {
   const svg = useMemo(() => {
     if (!data || data.length === 0) return null
 
@@ -34,7 +34,6 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
     const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ')
     const areaD = pathD + ` L${points[points.length - 1].x},${pad.top + ch} L${points[0].x},${pad.top + ch} Z`
 
-    // Y-axis ticks (5 штук)
     const yTicks = Array.from({ length: 5 }, (_, i) => {
       const v = minV + (range * i) / 4
       const y = pad.top + ch - (i / 4) * ch
@@ -52,7 +51,6 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" style={{ width: '100%', maxWidth: W }}>
-      {/* gradient fill */}
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.3" />
@@ -60,7 +58,6 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
         </linearGradient>
       </defs>
 
-      {/* Y-axis grid lines */}
       {yTicks.map((t, i) => (
         <g key={i}>
           <line
@@ -68,17 +65,16 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
             y1={t.y}
             x2={pad.left + cw}
             y2={t.y}
-            stroke="var(--blue-gray)"
+            stroke="var(--gray-400)"
             strokeWidth="0.5"
             strokeDasharray="4,4"
           />
-          <text x={pad.left - 6} y={t.y + 4} textAnchor="end" fontSize="11" fill="var(--navy)">
+          <text x={pad.left - 6} y={t.y + 4} textAnchor="end" fontSize="11" fill="#111">
             {t.v}
           </text>
         </g>
       ))}
 
-      {/* X-axis labels */}
       {points.map((p, i) => (
         <text
           key={i}
@@ -86,20 +82,17 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
           y={H - 6}
           textAnchor="middle"
           fontSize="10"
-          fill="var(--navy)"
+          fill="#111"
           transform={`rotate(-30, ${p.x}, ${H - 6})`}
         >
           {p.label}
         </text>
       ))}
 
-      {/* area */}
       <path d={areaD} fill="url(#chartGrad)" />
 
-      {/* line */}
       <path d={pathD} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
-      {/* dots */}
       {points.map((p, i) => (
         <g key={i}>
           <circle cx={p.x} cy={p.y} r="4" fill="white" stroke={color} strokeWidth="2" />
@@ -109,9 +102,8 @@ export function SimpleChart({ data, color = 'var(--navy)', label = '' }) {
         </g>
       ))}
 
-      {/* Y label */}
       {label && (
-        <text x={12} y={H / 2} textAnchor="middle" fontSize="11" fill="var(--navy)" transform={`rotate(-90, 12, ${H / 2})`}>
+        <text x={12} y={H / 2} textAnchor="middle" fontSize="11" fill="#111" transform={`rotate(-90, 12, ${H / 2})`}>
           {label}
         </text>
       )}

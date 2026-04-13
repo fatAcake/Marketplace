@@ -4,6 +4,7 @@ import { useAuth } from '../auth/useAuth.js'
 import * as productsApi from '../api/products.js'
 import * as analyticsApi from '../api/analytics.js'
 import { SimpleChart } from '../components/SimpleChart.jsx'
+import { EditProductModal } from '../components/EditProductModal.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5035'
 const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
@@ -19,12 +20,11 @@ export function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
-  // Описание — свёрнуто по умолчанию если длинное
   const [descExpanded, setDescExpanded] = useState(false)
   const descMaxLen = 180
 
-  // Графики цен/скидок
   const [priceHistory, setPriceHistory] = useState([])
   const [chartLoading, setChartLoading] = useState(false)
 
@@ -47,7 +47,6 @@ export function ProductDetailPage() {
         setImages([])
       }
 
-      // Загружаем историю цен
       try {
         setChartLoading(true)
         const history = await analyticsApi.getPriceHistory(id, token)
@@ -77,20 +76,30 @@ export function ProductDetailPage() {
     }
   }
 
+  async function handleEditSuccess() {
+    setEditModalOpen(false)
+    loadProduct()
+  }
+
   const isOwner = user?.id === (product?.userId ?? product?.UserId)
 
-  // Нормализация полей
+  const isDiscountActive = (() => {
+    if (!product) return false
+    const discountSize = product.discountSize ?? product.DiscountSize
+    const discountedPrice = product.discountedPrice ?? product.DiscountedPrice
+    return discountSize != null && discountSize !== 0 && discountedPrice != null
+  })()
+
   const p = product ? {
     name: product.name ?? product.Name ?? '',
     price: product.price ?? product.Price ?? 0,
     quantity: product.quantity ?? product.Quantity ?? 0,
     description: product.description ?? product.Description ?? '',
     sellerNickName: product.sellerNickName ?? product.SellerNickName ?? '',
-    discountSize: product.discountSize ?? product.DiscountSize,
-    discountedPrice: product.discountedPrice ?? product.DiscountedPrice,
+    discountSize: isDiscountActive ? (product.discountSize ?? product.DiscountSize) : null,
+    discountedPrice: isDiscountActive ? (product.discountedPrice ?? product.DiscountedPrice) : null,
   } : {}
 
-  // Данные для графика цен
   const priceChartData = priceHistory.length > 0
     ? (() => {
         const points = []
@@ -126,7 +135,6 @@ export function ProductDetailPage() {
       })()
     : null
 
-  // Данные для графика скидок
   const discountChartData = priceHistory.length > 0
     ? (() => {
         const points = []
@@ -185,7 +193,6 @@ export function ProductDetailPage() {
       {error && <div className="alert error" style={{ marginTop: 12 }}>{error}</div>}
 
       <div className="product-detail-grid">
-        {/* Галерея изображений */}
         <div className="product-detail-gallery">
           {selectedImage ? (
             <img
@@ -195,7 +202,7 @@ export function ProductDetailPage() {
             />
           ) : (
             <div className="product-detail-placeholder">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--blue-gray)" strokeWidth="1">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" strokeWidth="1">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
@@ -219,7 +226,6 @@ export function ProductDetailPage() {
           )}
         </div>
 
-        {/* Информация о продукте */}
         <div className="product-detail-info">
           <h1 className="product-detail-title">{p.name}</h1>
 
@@ -263,9 +269,11 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {/* Кнопки действий (только для владельца) */}
           {isOwner && (
             <div className="product-detail-actions">
+              <button className="btn btn-edit" onClick={() => setEditModalOpen(true)}>
+                ✏️ Изменить
+              </button>
               <button className="btn btn-danger-outline" onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Удаление...' : '🗑 Удалить'}
               </button>
@@ -274,7 +282,6 @@ export function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Графики цен и скидок */}
       <div className="product-detail-charts">
         <h2 className="product-detail-charts-title">История цен и скидок</h2>
 
@@ -304,6 +311,15 @@ export function ProductDetailPage() {
           </>
         )}
       </div>
+
+      {editModalOpen && product && (
+        <EditProductModal
+          product={product}
+          token={token}
+          onClose={() => setEditModalOpen(false)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </section>
   )
 }

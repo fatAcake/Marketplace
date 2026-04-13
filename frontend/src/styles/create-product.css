@@ -7,7 +7,7 @@
 .create-product-title {
   margin: 12px 0 20px;
   font-size: 26px;
-  color: var(--navy);
+  color: #111;
 }
 
 .create-product-form {
@@ -27,7 +27,7 @@
   flex-direction: column;
   gap: 5px;
   font-weight: 600;
-  color: var(--navy);
+  color: #111;
   font-size: 14px;
 }
 
@@ -37,17 +37,21 @@
   font-size: 14px;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid var(--blue-gray);
+  border: 1px solid var(--gray-400);
   background: #fff;
-  color: var(--navy);
+  color: #111;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .create-product-fields input:focus,
 .create-product-fields textarea:focus {
-  border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(47, 65, 86, 0.1);
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   outline: none;
+}
+
+.create-product-fields input[type="datetime-local"] {
+  color-scheme: light;
 }
 
 .create-product-row {
@@ -67,26 +71,32 @@
   opacity: 0.5;
 }
 
+.create-product-hint {
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  opacity: 0.5;
+}
+
 /* Изображения */
 .create-product-images h3 {
   margin: 0 0 10px;
   font-size: 16px;
-  color: var(--navy);
+  color: #111;
 }
 
 .create-product-dropzone {
-  border: 2px dashed var(--blue-gray);
+  border: 2px dashed var(--gray-400);
   border-radius: 12px;
   padding: 32px;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
-  background: var(--beige);
+  background: var(--gray-100);
 }
 
 .create-product-dropzone:hover {
-  border-color: var(--navy);
-  background: var(--pink-light);
+  border-color: #111;
+  background: var(--gray-200);
 }
 
 .create-product-dropzone svg {
@@ -95,13 +105,13 @@
 
 .create-product-dropzone p {
   margin: 0;
-  color: var(--navy);
+  color: #111;
   opacity: 0.6;
   font-size: 14px;
 }
 
 .create-product-dropzone span {
-  color: var(--navy);
+  color: #111;
   font-weight: 600;
   opacity: 1;
   text-decoration: underline;
@@ -121,7 +131,7 @@
   height: 90px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid var(--blue-gray);
+  border: 2px solid var(--gray-400);
 }
 
 .create-product-preview img {

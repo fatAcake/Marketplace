@@ -5,11 +5,11 @@
   --danger: #b00020;
   --ok: #0a7a0a;
 
-  --pink-light: #ffe1e6;
-  --pink-medium: #f7c9d6;
-  --beige: #f5efeb;
-  --blue-gray: #c8d9e6;
-  --navy: #2f4156;
+  --gray-100: #f1f8f8;
+  --gray-200: #e4f1f1;
+  --gray-300: #d0e7e7;
+  --gray-400: #b1d8d8;
+  --gray-500: #a1c9c9;
 
   font-family: 'Roboto', system-ui, -apple-system, sans-serif;
   font-synthesis: none;

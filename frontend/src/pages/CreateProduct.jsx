@@ -11,6 +11,9 @@ export function CreateProductPage() {
   const [price, setPrice] = useState('')
   const [quantity, setQuantity] = useState('')
   const [description, setDescription] = useState('')
+  const [discountSize, setDiscountSize] = useState('')
+  const [discountStartDate, setDiscountStartDate] = useState('')
+  const [discountEndDate, setDiscountEndDate] = useState('')
   const [images, setImages] = useState([])
   const [imagePreviews, setImagePreviews] = useState([])
   const [busy, setBusy] = useState(false)
@@ -20,7 +23,6 @@ export function CreateProductPage() {
     const fileArr = Array.from(files)
     setImages((prev) => [...prev, ...fileArr])
 
-    // Превью
     fileArr.forEach((file) => {
       const url = URL.createObjectURL(file)
       setImagePreviews((prev) => [...prev, url])
@@ -45,6 +47,14 @@ export function CreateProductPage() {
     if (!name.trim()) { setError('Введите название'); return }
     if (!price || parseFloat(price) <= 0) { setError('Укажите корректную цену'); return }
     if (!quantity || parseInt(quantity) < 1) { setError('Укажите количество'); return }
+    if (discountSize !== '' && (parseFloat(discountSize) < 0 || parseFloat(discountSize) > 100)) {
+      setError('Скидка должна быть от 0 до 100%')
+      return
+    }
+    if (discountStartDate && discountEndDate && new Date(discountEndDate) <= new Date(discountStartDate)) {
+      setError('Дата окончания должна быть позже даты начала')
+      return
+    }
 
     setBusy(true)
     try {
@@ -53,6 +63,15 @@ export function CreateProductPage() {
       formData.append('Price', parseFloat(price))
       formData.append('Quantity', parseInt(quantity))
       formData.append('Description', description.trim())
+      if (discountSize !== '' && discountSize != null) {
+        formData.append('DiscountSize', parseFloat(discountSize))
+      }
+      if (discountStartDate) {
+        formData.append('DiscountStartDate', new Date(discountStartDate).toISOString())
+      }
+      if (discountEndDate) {
+        formData.append('DiscountEndDate', new Date(discountEndDate).toISOString())
+      }
       images.forEach((img) => formData.append('Images', img))
 
       const product = await productsApi.createProduct(formData, token)
@@ -73,7 +92,6 @@ export function CreateProductPage() {
       {error && <div className="alert error">{error}</div>}
 
       <form className="create-product-form" onSubmit={handleSubmit}>
-        {/* Основные поля */}
         <div className="create-product-fields">
           <label>
             Название
@@ -112,6 +130,41 @@ export function CreateProductPage() {
           </div>
 
           <label>
+            Скидка (%)
+            <input
+              type="number"
+              value={discountSize}
+              onChange={(e) => setDiscountSize(e.target.value)}
+              placeholder="0"
+              min="0"
+              max="100"
+              step="1"
+            />
+            <span className="create-product-hint">Оставьте пустым, если скидки нет</span>
+          </label>
+
+          {discountSize && (
+            <div className="create-product-row">
+              <label>
+                Начало скидки
+                <input
+                  type="datetime-local"
+                  value={discountStartDate}
+                  onChange={(e) => setDiscountStartDate(e.target.value)}
+                />
+              </label>
+              <label>
+                Окончание скидки
+                <input
+                  type="datetime-local"
+                  value={discountEndDate}
+                  onChange={(e) => setDiscountEndDate(e.target.value)}
+                />
+              </label>
+            </div>
+          )}
+
+          <label>
             Описание
             <textarea
               className="create-product-textarea"
@@ -125,7 +178,6 @@ export function CreateProductPage() {
           </label>
         </div>
 
-        {/* Загрузка изображений */}
         <div className="create-product-images">
           <h3>Изображения</h3>
 
@@ -135,7 +187,7 @@ export function CreateProductPage() {
             onDragOver={(e) => e.preventDefault()}
             onClick={() => document.getElementById('fileInput').click()}
           >
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--blue-gray)" strokeWidth="1.5">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" strokeWidth="1.5">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
@@ -169,7 +221,6 @@ export function CreateProductPage() {
           )}
         </div>
 
-        {/* Кнопка */}
         <div className="create-product-submit">
           <button className="btn btn-primary-navy btn-lg" type="submit" disabled={busy}>
             {busy ? 'Создание...' : 'Создать товар'}

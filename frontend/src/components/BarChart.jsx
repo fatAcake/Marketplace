@@ -5,7 +5,7 @@ import { useMemo } from 'react'
  * @param {object[]} data — [{ label, value }, ...]
  * @param {string} color
  */
-export function BarChart({ data, color = 'var(--navy)' }) {
+export function BarChart({ data, color = '#111' }) {
   const bars = useMemo(() => {
     if (!data || data.length === 0) return null
     const maxVal = Math.max(...data.map((d) => d.value), 1)

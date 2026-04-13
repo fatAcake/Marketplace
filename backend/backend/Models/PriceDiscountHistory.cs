@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models
 {
-       [Table("price_discount_history")]
+    [Table("price_discount_history")]
     public class PriceDiscountHistory
     {
         [Key]

@@ -35,11 +35,9 @@ namespace backend.Models
         public bool deleted { get; set; } = false;
 
         [ForeignKey("user_id")]
-        public Users User { get; set; } = null!;
+        public Users User { get; set; }
 
+        // Навигационное свойство — коллекция изображений
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
-        
-        // Для истории цен
-        public virtual ICollection<PriceDiscountHistory> PriceDiscountHistories { get; set; } = new List<PriceDiscountHistory>();
     }
 }

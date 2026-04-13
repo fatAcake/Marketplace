@@ -1,41 +1,46 @@
-﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace backend.Models
 {
-    [Table("OrderItem")]
+    [Table("order_items")]
     public class OrderItem
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int id { get; set; }
 
-        [ForeignKey("Product")]
-        public int ProductId { get; set; }
+        public int product_id { get; set; }
 
-        [ForeignKey("Order")]
-        public int OrderId { get; set; }
+        public int order_id { get; set; }
 
-        public int SellerId { get; set; }
+        public int seller_id { get; set; }
 
-        public int Quantity { get; set; }
+        [Required]
+        public int quantity { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal price_at_buy { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal PriceAtBuy { get; set; }
+        public decimal? discount_at_buy { get; set; }
 
+        [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DiscountAtBuy { get; set; }
+        public decimal final_price_at_buy { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal FinalPriceAtBuy { get; set; }
-
+        [Required]
         [StringLength(255)]
-        public string NameAtBuy { get; set; }
+        public string name_at_buy { get; set; } = string.Empty;
 
-        // Navigation Properties
-        public virtual Products Products { get; set; }
-        public virtual Order Order { get; set; }
+        // Навигационные свойства
+        [ForeignKey("product_id")]
+        public Products Product { get; set; }
+
+        [ForeignKey("order_id")]
+        public Orders Order { get; set; }
+
+        [ForeignKey("seller_id")]
+        public Users Seller { get; set; }
     }
 }

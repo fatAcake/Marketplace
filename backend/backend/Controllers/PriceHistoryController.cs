@@ -1,76 +1,76 @@
-using backend.Services;
+using System.Security.Claims;
+using backend.DTO;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("api/products")]
+    [Route("api/products/{productId}/[controller]")]
     public class PriceHistoryController : ControllerBase
     {
         private readonly IPriceHistoryService _priceHistoryService;
+        private readonly ILogger<PriceHistoryController> _logger;
 
-        public PriceHistoryController(IPriceHistoryService priceHistoryService)
+        public PriceHistoryController(IPriceHistoryService priceHistoryService, ILogger<PriceHistoryController> logger)
         {
             _priceHistoryService = priceHistoryService;
+            _logger = logger;
         }
 
-        [HttpGet("{id}/price-history")]
-        public async Task<IActionResult> GetPriceHistory(int id)
+        private int GetCurrentUserId()
         {
-            var history = await _priceHistoryService.GetHistoryForProductAsync(id);
-            return Ok(history);
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
+                throw new UnauthorizedAccessException("User ID not found in token");
+            return userId;
         }
 
-        [HttpPost("{id}/price-history")]
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPriceHistory(int productId)
+        {
+            try
+            {
+                var history = await _priceHistoryService.GetPriceHistoryAsync(productId);
+                return Ok(history);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении истории цен для товара {ProductId}", productId);
+                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+            }
+        }
+
+        [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddPriceHistory(int id, [FromBody] AddPriceHistoryRequest request)
+        public async Task<IActionResult> AddPriceHistory(int productId, [FromBody] PriceHistoryCreateDto dto)
         {
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId == null)
-                return Unauthorized(new { message = "Не удалось определить пользователя" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var history = await _priceHistoryService.AddHistoryAsync(
-                id,
-                request.OldPrice,
-                request.NewPrice,
-                request.OldDiscount,
-                request.NewDiscount,
-                currentUserId.Value
-            );
+            try
+            {
+                var userId = GetCurrentUserId();
+                var historyEntry = await _priceHistoryService.AddPriceHistoryAsync(
+                    productId,
+                    dto.NewPrice,
+                    dto.NewDiscount,
+                    userId
+                );
 
-            return Ok(history);
+                return Ok(historyEntry);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении записи истории цен для товара {ProductId}", productId);
+                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+            }
         }
-
-        [HttpDelete("{productId}/price-history/{historyId}")]
-        [Authorize]
-        public async Task<IActionResult> DeletePriceHistory(int productId, int historyId)
-        {
-            var result = await _priceHistoryService.DeleteByIdAsync(historyId);
-            if (!result)
-                return NotFound(new { message = "Запись истории не найдена" });
-
-            return Ok(new { message = "Запись удалена" });
-        }
-
-        private int? GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                           ?? User.FindFirst("sub")?.Value
-                           ?? User.FindFirst("userId")?.Value;
-
-            if (int.TryParse(userIdClaim, out int userId))
-                return userId;
-            return null;
-        }
-    }
-
-    public class AddPriceHistoryRequest
-    {
-        public decimal OldPrice { get; set; }
-        public decimal NewPrice { get; set; }
-        public decimal OldDiscount { get; set; }
-        public decimal NewDiscount { get; set; }
     }
 }

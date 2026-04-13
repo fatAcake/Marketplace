@@ -46,6 +46,13 @@ public class UpdateProductDto
 
     [StringLength(2000)]
     public string? Description { get; set; }
+
+    [Range(0, 100)]
+    public decimal? DiscountSize { get; set; }
+
+    public DateTimeOffset? DiscountStartDate { get; set; }
+
+    public DateTimeOffset? DiscountEndDate { get; set; }
 }
 
 public class UserProductInfo

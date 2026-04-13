@@ -1,21 +1,11 @@
-using backend.Models;
+using backend.DTO;
 
-namespace backend.Services
+namespace backend.Services.Interfaces
 {
     public interface IPriceHistoryService
     {
-        Task<List<PriceDiscountHistory>> GetHistoryForProductAsync(int productId);
-        Task<PriceDiscountHistory> AddHistoryAsync(int productId, decimal oldPrice, decimal newPrice,
-            decimal oldDiscount, decimal newDiscount, int changedByUserId);
-        Task<bool> DeleteByIdAsync(int historyId);
-        
-        // Новый метод для удобной записи изменений
-        Task<PriceDiscountHistory?> RecordPriceChangeAsync(
-            int productId,
-            decimal? oldPrice,
-            decimal? newPrice,
-            decimal? oldDiscount,
-            decimal? newDiscount,
-            int changedByUserId);
+        Task<List<PriceHistoryDto>> GetPriceHistoryAsync(int productId);
+        Task<PriceHistoryDto> AddPriceHistoryAsync(int productId, decimal? newPrice, decimal? newDiscount, int? changedBy);
+        Task RecordPriceChangeAsync(int productId, decimal? oldPrice, decimal? newPrice, decimal? oldDiscount, decimal? newDiscount, int? changedBy);
     }
 }

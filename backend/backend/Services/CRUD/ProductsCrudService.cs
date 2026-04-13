@@ -9,8 +9,8 @@ namespace backend.Services.CRUD
     public class ProductsCrudService : IProductsCrudService
     {
         private readonly DBContext _db;
-        private readonly IPriceHistoryService _priceHistoryService;
         private readonly IProductImagesService _productImagesService;
+        private readonly IPriceHistoryService _priceHistoryService;
         private readonly ILogger<ProductsCrudService> _logger;
 
         public ProductsCrudService(DBContext db, IProductImagesService productImagesService, IPriceHistoryService priceHistoryService, ILogger<ProductsCrudService> logger)
@@ -147,11 +147,51 @@ namespace backend.Services.CRUD
             if (product.user_id != userId)
                 throw new UnauthorizedAccessException("Вы не являетесь владельцем этого продукта");
 
-            // Сохраняем старую цену
-            var oldPrice = (decimal)product.price;
-            var newPrice = dto.Price.HasValue ? (decimal)dto.Price.Value : oldPrice;
+            // Сохраняем старые значения для истории
+            var oldPrice = dto.Price.HasValue ? (decimal?)product.price : null;
+            var newPrice = dto.Price.HasValue ? (decimal?)dto.Price.Value : null;
 
-            // Обновляем поля
+            // Получаем текущую активную скидку
+            var currentDiscount = await _db.Discounts
+                .Where(d => d.product_id == product.id && !d.deleted)
+                .OrderByDescending(d => d.created_at)
+                .FirstOrDefaultAsync();
+
+            var oldDiscount = currentDiscount?.size;
+
+            // Определяем новый размер скидки
+            decimal? newDiscount = null;
+            bool discountChanged = false;
+
+            if (dto.DiscountSize.HasValue || dto.DiscountStartDate.HasValue || dto.DiscountEndDate.HasValue)
+            {
+                discountChanged = true;
+                newDiscount = dto.DiscountSize ?? currentDiscount?.size;
+
+                // Обновляем или создаём скидку
+                if (currentDiscount != null)
+                {
+                    currentDiscount.size = dto.DiscountSize ?? currentDiscount.size;
+                    currentDiscount.start_date = dto.DiscountStartDate?.UtcDateTime ?? currentDiscount.start_date;
+                    currentDiscount.end_date = dto.DiscountEndDate?.UtcDateTime ?? currentDiscount.end_date;
+                    currentDiscount.edited_at = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Создаём новую скидку
+                    var newDiscountEntity = new Discount
+                    {
+                        product_id = product.id,
+                        size = dto.DiscountSize ?? 0,
+                        start_date = dto.DiscountStartDate?.UtcDateTime ?? DateTime.UtcNow,
+                        end_date = dto.DiscountEndDate?.UtcDateTime ?? DateTime.UtcNow.AddDays(30),
+                        created_at = DateTime.UtcNow
+                    };
+                    _db.Discounts.Add(newDiscountEntity);
+                }
+            }
+
+            // Обновляем только переданные поля
             if (!string.IsNullOrEmpty(dto.Name))
                 product.name = dto.Name;
             if (dto.Price.HasValue)
@@ -165,20 +205,17 @@ namespace backend.Services.CRUD
 
             await _db.SaveChangesAsync();
 
-            // Записываем историю изменения цены (скидка не менялась)
-            if (oldPrice != newPrice)
+            // Записываем изменение цены и/или скидки в историю
+            if (dto.Price.HasValue || discountChanged)
             {
                 await _priceHistoryService.RecordPriceChangeAsync(
-                    id,
+                    product.id,
                     oldPrice,
                     newPrice,
-                    null, // скидка не менялась
-                    null,
+                    oldDiscount,
+                    discountChanged ? newDiscount : oldDiscount,
                     userId
                 );
-
-                _logger.LogInformation("История цены сохранена для продукта {ProductId}: {OldPrice} -> {NewPrice}",
-                    id, oldPrice, newPrice);
             }
 
             _logger.LogInformation("Продукт обновлён: {ProductId}, пользователь: {UserId}", id, userId);

@@ -1,0 +1,201 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(47, 65, 86, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--gray-400);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #111;
+  font-size: 20px;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--gray-100);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.modal-close:hover {
+  background: var(--gray-300);
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--gray-400);
+  padding: 0 32px;
+}
+
+.modal-tab {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  opacity: 0.5;
+  border-bottom: 2px solid transparent;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.modal-tab:hover {
+  opacity: 0.8;
+}
+
+.modal-tab.active {
+  opacity: 1;
+  border-bottom-color: #111;
+}
+
+.modal-body {
+  padding: 28px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Small modal variant */
+.modal-content.modal-sm {
+  max-width: 680px;
+}
+
+/* Edit product modal — фиксированные размеры, без скачков */
+.modal-content.modal-edit {
+  display: block;
+  width: 800px;
+  max-width: calc(100vw - 32px);
+  height: 80vh;
+  max-height: calc(100vh - 32px);
+  animation: none;
+  overflow-y: auto;
+}
+
+.modal-content.modal-edit .modal-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-content.modal-edit .modal-body {
+  overflow: visible;
+}
+
+@media (max-width: 600px) {
+  .modal-content.modal-edit {
+    width: calc(100vw - 24px);
+    height: 85vh;
+  }
+}
+
+/* Edit product form inside modal */
+.edit-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-product-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: 600;
+  color: #111;
+  font-size: 14px;
+}
+
+.edit-product-form input,
+.edit-product-form textarea {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-400);
+  background: #fff;
+  color: #111;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.edit-product-form input:focus,
+.edit-product-form textarea:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.edit-product-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.edit-product-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.edit-product-hint {
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  opacity: 0.5;
+}
+
+.edit-product-counter {
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  opacity: 0.5;
+}
+
+.edit-product-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}

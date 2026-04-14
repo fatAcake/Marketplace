@@ -1,0 +1,84 @@
+/* Основные переменные для проекта */
+.page {
+  --primary-blue: #0047FF;
+  --bg-light: #F8F9FB;
+  --text-dark: #1A1A1A;
+  --text-gray: #666666;
+  --radius: 16px;
+  
+  font-family: 'Inter', sans-serif;
+  background-color: #fff;
+  color: var(--text-dark);
+}
+
+/*верхний баннер */
+.hero {
+  background-color: var(--primary-blue);
+  background-image: linear-gradient(135deg, #0047FF 0%, #002D9C 100%);
+  border-radius: var(--radius);
+  margin: 20px auto;
+  padding: 80px 60px;
+  max-width: 1200px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  max-width: 600px;
+  line-height: 1.1;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 500px;
+}
+
+/* Заголовки секций */
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 40px 0 24px;
+}
+
+/* Сетка товаров */
+.productGrid {
+  display: grid;
+  /* Адаптивная сетка: минимум 280px на карточку */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  padding-bottom: 60px;
+}
+
+/* Состояния загрузки и пустоты */
+.loader, .empty {
+  text-align: center;
+  padding: 100px 0;
+  font-size: 1.2rem;
+  color: var(--text-gray);
+}
+
+/* Адаптивность для мобилок */
+@media (max-width: 768px) {
+  .hero {
+    margin: 10px;
+    padding: 40px 20px;
+    border-radius: 12px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+  }
+}

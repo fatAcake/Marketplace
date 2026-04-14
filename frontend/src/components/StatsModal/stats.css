@@ -1,0 +1,172 @@
+.stats-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stats-kpi-card {
+  text-align: center;
+  padding: 16px;
+  background: var(--gray-100);
+  border-radius: 10px;
+  border: 1px solid var(--gray-400);
+}
+
+.stats-kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+}
+
+.stats-kpi-label {
+  font-size: 12px;
+  color: #111;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* Chart */
+.stats-chart-section {
+  margin-bottom: 24px;
+}
+
+.stats-chart-section h4 {
+  margin: 0 0 12px;
+  color: #111;
+  font-size: 16px;
+}
+
+.chart-svg {
+  background: var(--gray-100);
+  border-radius: 10px;
+  border: 1px solid var(--gray-400);
+  padding: 8px;
+}
+
+/* Таблица */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.stats-table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--gray-400);
+  color: #111;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.stats-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--gray-100);
+  color: #111;
+}
+
+.stats-table tr:last-child td {
+  border-bottom: none;
+}
+
+.stats-table tr:hover td {
+  background: var(--gray-100);
+}
+
+/* Список товаров (tab «Товары») */
+.stats-top-products h4,
+.stats-history-table h4 {
+  margin: 0 0 12px;
+  color: #111;
+  font-size: 16px;
+}
+
+.stats-product-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-product-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-400);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.stats-product-item:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+}
+
+.stats-product-name {
+  font-weight: 600;
+  color: #111;
+  font-size: 15px;
+}
+
+.stats-product-meta {
+  font-size: 12px;
+  color: #111;
+  opacity: 0.6;
+}
+
+/* ========================================
+   BAR CHART (горизонтальные полосы)
+   ======================================== */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  min-width: 100px;
+  max-width: 140px;
+  font-size: 13px;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gray-100);
+  border-radius: 6px;
+  padding: 4px 8px;
+  min-height: 28px;
+}
+
+.bar-fill {
+  height: 20px;
+  border-radius: 4px;
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+
+.bar-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+}

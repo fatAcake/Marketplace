@@ -1,30 +1,35 @@
-import { apiFetch } from './http.js'
+import { api } from './http.js';
 
-export function register(payload) {
-  return apiFetch('/api/auth/register', { method: 'POST', body: payload })
-}
+const BASE_PATH = '/api/auth';
 
-export function verifyCode(payload) {
-  return apiFetch('/api/auth/verify-code', { method: 'POST', body: payload })
-}
+/**
+ * Объект для работы с аутентификацией.
+ * Обратите внимание: теперь методы не требуют явной передачи токена, 
+ * если мы решим передавать его через опции (или позже автоматизируем это).
+ */
+export const authApi = {
+  register: (payload) => 
+    api.post(`${BASE_PATH}/register`, payload),
 
-export function resendCode(payload) {
-  return apiFetch('/api/auth/resend-code', { method: 'POST', body: payload })
-}
+  verifyCode: (payload) => 
+    api.post(`${BASE_PATH}/verify-code`, payload),
 
-export function login(payload) {
-  return apiFetch('/api/auth/login', { method: 'POST', body: payload })
-}
+  resendCode: (payload) => 
+    api.post(`${BASE_PATH}/resend-code`, payload),
 
-export function me(token) {
-  return apiFetch('/api/auth/me', { method: 'GET', token })
-}
+  login: (payload) => 
+    api.post(`${BASE_PATH}/login`, payload),
 
-export function refresh() {
-  return apiFetch('/api/auth/refresh', { method: 'POST' })
-}
+  /**
+   * Получение данных о текущем пользователе.
+   * Опции (включая token) теперь передаются вторым/третьим аргументом.
+   */
+  getMe: (options) => 
+    api.get(`${BASE_PATH}/me`, options),
 
-export function logout(token) {
-  return apiFetch('/api/auth/logout', { method: 'POST', token })
-}
+  refresh: () => 
+    api.post(`${BASE_PATH}/refresh`),
 
+  logout: (options) => 
+    api.post(`${BASE_PATH}/logout`, null, options),
+};

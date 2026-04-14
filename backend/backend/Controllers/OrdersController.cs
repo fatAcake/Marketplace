@@ -19,14 +19,6 @@ namespace backend.Controllers
             _logger = logger;
         }
 
-        private int GetCurrentUserId()
-        {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
-                throw new UnauthorizedAccessException("User ID not found in token");
-            return userId;
-        }
-
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
@@ -39,7 +31,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var order = await _ordersService.CreateOrderAsync(dto, userId);
                 return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
             }
@@ -64,7 +56,7 @@ namespace backend.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var orders = await _ordersService.GetUserOrdersAsync(userId);
                 return Ok(orders);
             }
@@ -81,7 +73,7 @@ namespace backend.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var order = await _ordersService.GetOrderByIdAsync(id, userId);
 
                 if (order == null)
@@ -109,7 +101,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var order = await _ordersService.UpdateOrderStatusAsync(id, dto.Status, userId);
                 return Ok(order);
             }

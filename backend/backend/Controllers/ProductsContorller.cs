@@ -21,14 +21,6 @@ namespace backend.Controllers
             _logger = logger;
         }
 
-        private int GetCurrentUserId()
-        {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
-                throw new UnauthorizedAccessException("User ID not found in token");
-            return userId;
-        }
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAllProducts()
@@ -65,7 +57,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var product = await _productsCrudService.CreateProductAsync(dto, userId);
                 return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
             }
@@ -85,7 +77,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var product = await _productsCrudService.UpdateProductAsync(id, dto, userId);
 
                 if (product == null)
@@ -110,7 +102,7 @@ namespace backend.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var result = await _productsCrudService.DeleteProductAsync(id, userId);
 
                 if (!result)
@@ -170,7 +162,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 // Берём следующий order после последнего
                 var existingImages = await _productImagesService.GetImagesAsync(id);
                 var order = existingImages.Any() ? existingImages.Max(i => i.Order) + 1 : 0;
@@ -199,7 +191,7 @@ namespace backend.Controllers
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var result = await _productImagesService.DeleteImageAsync(id, imageId, userId);
 
                 if (!result)
@@ -231,7 +223,7 @@ namespace backend.Controllers
 
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var result = await _productImagesService.ReorderImagesAsync(id, imageIds, userId);
 
                 if (!result)

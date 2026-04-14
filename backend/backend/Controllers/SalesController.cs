@@ -18,21 +18,13 @@ namespace backend.Controllers
             _logger = logger;
         }
 
-        private int GetCurrentUserId()
-        {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim == null || !int.TryParse(idClaim.Value, out int userId))
-                throw new UnauthorizedAccessException("User ID not found in token");
-            return userId;
-        }
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetSellerSales()
         {
             try
             {
-                var userId = GetCurrentUserId();
+                var userId = Methods.GetCurrentUserId(User);
                 var sales = await _ordersService.GetSellerSalesAsync(userId);
                 return Ok(sales);
             }

@@ -1,6 +1,6 @@
-// Program.cs
 using DotNetEnv;
 using backend.Data;
+using backend.Seeders;
 using backend.Services;
 using backend.Services.CRUD;
 using backend.Services.Interfaces;
@@ -140,6 +140,11 @@ using (var scope = app.Services.CreateScope())
         await dbContext.Database.MigrateAsync();
 
         app.Logger.LogInformation("Миграции успешно применены.");
+
+        // ЗАПУСК СИИДЕРА ДЛЯ ЗАПОЛНЕНИЯ БАЗЫ ДАННЫХ
+        // app.Logger.LogInformation("Заполнение базы данных начальными данными...");
+        // await DataSeeder.SeedAsync(app.Services);
+        // app.Logger.LogInformation("Начальные данные успешно загружены.");
     }
 }
 

@@ -17,7 +17,7 @@ export default function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify" element={<VerifyCodePage />} />
         <Route path="me" element={<MePage />} />
-        <Route path="products/:id" element={<ProductDetailPage />} />
+        <Route path="product/:id" element={<ProductDetailPage />} />
         <Route path="products/create" element={<CreateProductPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

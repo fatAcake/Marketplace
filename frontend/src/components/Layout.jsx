@@ -10,7 +10,7 @@ export function Layout() {
       <header className="topbar">
         <div className="container topbar-inner">
           <NavLink to="/" className="brand">
-            Marketplace
+            BLISS
           </NavLink>
           <nav className="nav">
             <NavLink className="btn" to="/">

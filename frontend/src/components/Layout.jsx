@@ -1,8 +1,10 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth.js'
+import { useCart } from '../cart/useCart.js'
 
 export function Layout() {
   const { user, token, logout, loading } = useAuth()
+  const { totalItems } = useCart()
   const navigate = useNavigate()
 
   return (
@@ -29,16 +31,42 @@ export function Layout() {
                 </NavLink>
               </>
             ) : (
-              <button
-                className="btn"
-                onClick={async () => {
-                  await logout()
-                  navigate('/login')
-                }}
-                disabled={loading}
-              >
-                Выйти
-              </button>
+              <>
+                <NavLink className="btn" to="/cart" style={{ position: 'relative' }}>
+                  Корзина
+                  {totalItems > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-6px',
+                        right: '-12px',
+                        background: 'var(--color-danger, #e53e3e)',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        width: '20px',
+                        height: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {totalItems}
+                    </span>
+                  )}
+                </NavLink>
+                <button
+                  className="btn"
+                  onClick={async () => {
+                    await logout()
+                    navigate('/login')
+                  }}
+                  disabled={loading}
+                >
+                  Выйти
+                </button>
+              </>
             )}
           </nav>
         </div>

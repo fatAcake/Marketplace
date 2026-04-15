@@ -24,9 +24,9 @@ const statusColors = {
 function normalizeOrder(o) {
   return {
     id: o.id ?? o.Id ?? o.orderId,
-    status: o.status ?? o.Status ?? 'pending',
+    status: o.status ?? o.Status ?? o.OrderStatus ?? 'pending',
     createdAt: o.createdAt ?? o.CreatedAt ?? '',
-    totalAmount: o.totalAmount ?? o.TotalAmount ?? 0,
+    totalAmount: o.totalSum ?? o.TotalSum ?? o.totalAmount ?? o.TotalAmount ?? 0,
     items: o.items ?? o.Items ?? o.orderItems ?? [],
     sellerName: o.sellerName ?? o.SellerName ?? o.sellerNickName ?? '',
   }
@@ -50,6 +50,7 @@ export function OrderCard({ order: rawOrder }) {
 
   const statusColor = statusColors[order.status.toLowerCase()] || '#6b7280'
   const statusLabel = statusLabels[order.status.toLowerCase()] || order.status
+  const items = Array.isArray(order.items) ? order.items : []
 
   return (
     <div className="order-card">
@@ -66,7 +67,7 @@ export function OrderCard({ order: rawOrder }) {
       </div>
 
       <div className="order-card-items">
-        {order.items.slice(0, 3).map((item, i) => (
+        {items.slice(0, 3).map((item, i) => (
           <div className="order-item" key={i}>
             <Link
               to={`/products/${item.productId ?? item.ProductId ?? item.product_id}`}
@@ -75,7 +76,7 @@ export function OrderCard({ order: rawOrder }) {
               {item.productName ?? item.ProductName ?? item.name ?? 'Товар'}
             </Link>
             <span className="order-item-qty">
-              {item.quantity ?? item.Quantity ?? 1} шт. × {item.price ?? item.Price ?? 0} ₽
+              {item.quantity ?? item.Quantity ?? 1} шт. × {item.finalPriceAtBuy ?? item.FinalPriceAtBuy ?? item.priceAtBuy ?? item.PriceAtBuy ?? item.price ?? item.Price ?? 0} ₽
             </span>
           </div>
         ))}

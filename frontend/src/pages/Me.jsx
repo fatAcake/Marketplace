@@ -33,9 +33,8 @@ export function MePage() {
     if (!loading && token && user?.id) {
       if (isSeller) {
         loadProducts()
-      } else {
-        loadOrders()
       }
+      loadOrders()
     }
   }, [token, user?.id, isSeller, loading])
 
@@ -81,7 +80,7 @@ export function MePage() {
   const totalOrdersValue = orders.reduce((sum, o) => {
     const items = o.items ?? o.Items ?? o.orderItems ?? []
     const orderSum = items.reduce((s, item) => {
-      const price = item.price ?? item.Price ?? 0
+      const price = item.finalPriceAtBuy ?? item.FinalPriceAtBuy ?? item.priceAtBuy ?? item.PriceAtBuy ?? item.price ?? item.Price ?? 0
       const qty = item.quantity ?? item.Quantity ?? 1
       return s + price * qty
     }, 0)
@@ -221,41 +220,39 @@ export function MePage() {
         </div>
       )}
 
-      {!isSeller && (
-        <div className="products-section">
-          <div className="products-header">
-            <h2>Мои заказы</h2>
-            <button
-              className="btn btn-sm btn-outline"
-              onClick={loadOrders}
-              disabled={ordersLoading}
-            >
-              {ordersLoading ? 'Загрузка...' : '↻ Обновить'}
-            </button>
-          </div>
-
-          {ordersLoading && orders.length === 0 ? (
-            <div className="products-empty">
-              <div className="products-empty-icon"><i className="bi bi-hourglass-split"></i></div>
-              <p>Загрузка заказов...</p>
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="products-empty">
-              <div className="products-empty-icon"><i className="bi bi-bag-x"></i></div>
-              <p>У вас пока нет заказов.</p>
-              <Link className="btn btn-primary-navy" to="/products">
-                <i className="bi bi-search me-1"></i>Перейти в каталог
-              </Link>
-            </div>
-          ) : (
-            <div className="orders-list">
-              {orders.map((order) => (
-                <OrderCard key={order.id ?? order.Id ?? order.orderId} order={order} />
-              ))}
-            </div>
-          )}
+      <div className="products-section">
+        <div className="products-header">
+          <h2>Мои заказы</h2>
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={loadOrders}
+            disabled={ordersLoading}
+          >
+            {ordersLoading ? 'Загрузка...' : '↻ Обновить'}
+          </button>
         </div>
-      )}
+
+        {ordersLoading && orders.length === 0 ? (
+          <div className="products-empty">
+            <div className="products-empty-icon"><i className="bi bi-hourglass-split"></i></div>
+            <p>Загрузка заказов...</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="products-empty">
+            <div className="products-empty-icon"><i className="bi bi-bag-x"></i></div>
+            <p>У вас пока нет заказов.</p>
+            <Link className="btn btn-primary-navy" to="/products">
+              <i className="bi bi-search me-1"></i>Перейти в каталог
+            </Link>
+          </div>
+        ) : (
+          <div className="orders-list">
+            {orders.map((order) => (
+              <OrderCard key={order.id ?? order.Id ?? order.orderId} order={order} />
+            ))}
+          </div>
+        )}
+      </div>
 
       {statsOpen && <StatsModal onClose={() => setStatsOpen(false)} />}
     </section>

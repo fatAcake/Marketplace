@@ -7,6 +7,7 @@ import { VerifyCodePage } from './pages/VerifyCode.jsx'
 import { MePage } from './pages/Me.jsx'
 import { ProductDetailPage } from './pages/ProductDetail.jsx'
 import { CreateProductPage } from './pages/CreateProduct.jsx'
+import { CartPage } from './pages/Cart.jsx'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify" element={<VerifyCodePage />} />
         <Route path="me" element={<MePage />} />
+        <Route path="cart" element={<CartPage />} />
         <Route path="products/:id" element={<ProductDetailPage />} />
         <Route path="products/create" element={<CreateProductPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

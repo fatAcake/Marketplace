@@ -1,15 +1,39 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import { useCart } from '../cart/useCart.js'
 import api from '../api/client'
 import '../styles/Home.css'
 
 export function HomePage() {
   const { token, user } = useAuth()
+  const { addToCart } = useCart()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [addedId, setAddedId] = useState(null)
+
+  const handleAddToCart = useCallback((product) => {
+    if (!token) {
+      window.location.href = '/login'
+      return
+    }
+    const sellerId = product.userId ?? product.UserId
+    if (user && sellerId != null && user.id === sellerId) return
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      discountedPrice: product.discountedPrice ?? null,
+      discountSize: product.discountSize ?? null,
+      stock: product.quantity ?? product.Quantity ?? null,
+      userId: sellerId,
+      imageUrl: product.firstImageUrl ?? null,
+    })
+    setAddedId(product.id)
+    setTimeout(() => setAddedId(null), 1200)
+  }, [token, user, addToCart])
 
   useEffect(() => {
     if (token) {
@@ -188,28 +212,32 @@ export function HomePage() {
             ) : (
               <div className="products-grid">
                 {products.map(product => (
-                  <Link to={`/product/${product.id}`} key={product.id} className="product-card">
-                    <div className="product-image">
-                      {product.firstImageUrl ? (
-                        <img 
-                          src={product.firstImageUrl}
-                          alt={product.name}
-                          onError={(e) => {
-                            e.target.style.display = 'none'
-                            const noImageDiv = e.target.parentElement.querySelector('.no-image')
-                            if (noImageDiv) noImageDiv.style.display = 'flex'
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="no-image" 
-                        style={{ display: !product.firstImageUrl ? 'flex' : 'none' }}
-                      >
-                        <span className="no-image-text">Нет фото</span>
+                  <div key={product.id} className="product-card">
+                    <Link to={`/product/${product.id}`} className="product-image-link">
+                      <div className="product-image">
+                        {product.firstImageUrl ? (
+                          <img
+                            src={product.firstImageUrl}
+                            alt={product.name}
+                            onError={(e) => {
+                              e.target.style.display = 'none'
+                              const noImageDiv = e.target.parentElement.querySelector('.no-image')
+                              if (noImageDiv) noImageDiv.style.display = 'flex'
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="no-image"
+                          style={{ display: !product.firstImageUrl ? 'flex' : 'none' }}
+                        >
+                          <span className="no-image-text">Нет фото</span>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                     <div className="product-info">
-                      <h3 className="product-name">{product.name}</h3>
+                      <Link to={`/product/${product.id}`} className="product-name">
+                        {product.name}
+                      </Link>
                       <div className="product-price">
                         <span className="current-price">{product.price} ₽</span>
                       </div>
@@ -218,21 +246,24 @@ export function HomePage() {
                         {product.quantity > 0 ? `В наличии: ${product.quantity} шт.` : 'Нет в наличии'}
                       </span>
                     </div>
-                    <button 
-                      className="add-to-cart-btn" 
+                    <button
+                      className="add-to-cart-btn"
                       onClick={(e) => {
                         e.preventDefault()
-                        if (!token) {
-                          window.location.href = '/login'
-                          return
-                        }
-                        console.log('Добавить в корзину:', product.id)
+                        e.stopPropagation()
+                        handleAddToCart(product)
                       }}
-                      disabled={product.quantity === 0}
+                      disabled={product.quantity === 0 || addedId === product.id || (user && product.userId != null && user.id === product.userId)}
                     >
-                      {product.quantity > 0 ? 'В корзину' : 'Нет в наличии'}
+                      {user && product.userId != null && user.id === product.userId
+                        ? 'Ваш товар'
+                        : product.quantity === 0
+                        ? 'Нет в наличии'
+                        : addedId === product.id
+                        ? '✓ Добавлено'
+                        : 'В корзину'}
                     </button>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}

@@ -128,16 +128,17 @@ namespace backend.Services.CRUD
                 .OrderByDescending(o => o.created_at)
                 .ToListAsync();
 
-            return orders.Select(o => new OrderDto
+            var result = new List<OrderDto>(orders.Count);
+            foreach (var order in orders)
             {
-                Id = o.id,
-                UserId = o.user_id,
-                OrderStatus = o.status,
-                TotalSum = o.total_sum,
-                TotalProducts = o.total_amount,
-                CreatedAt = o.created_at,
-                EditedAt = o.edited_at
-            }).ToList();
+                var dto = await MapToDtoAsync(order.id);
+                if (dto != null)
+                {
+                    result.Add(dto);
+                }
+            }
+
+            return result;
         }
 
         public async Task<OrderDto?> GetOrderByIdAsync(int orderId, int userId)

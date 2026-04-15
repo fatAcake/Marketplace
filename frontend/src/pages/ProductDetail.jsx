@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth.js'
+import { useCart } from '../cart/useCart.js'
 import * as productsApi from '../api/products.js'
 import * as analyticsApi from '../api/analytics.js'
 import { SimpleChart } from '../components/SimpleChart.jsx'
@@ -12,6 +13,7 @@ const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'И�
 export function ProductDetailPage() {
   const { id } = useParams()
   const { token, user } = useAuth()
+  const { addToCart } = useCart()
   const navigate = useNavigate()
 
   const [product, setProduct] = useState(null)
@@ -21,6 +23,7 @@ export function ProductDetailPage() {
   const [error, setError] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [addedFeedback, setAddedFeedback] = useState(false)
 
   const [descExpanded, setDescExpanded] = useState(false)
   const descMaxLen = 180
@@ -99,6 +102,35 @@ export function ProductDetailPage() {
     discountSize: isDiscountActive ? (product.discountSize ?? product.DiscountSize) : null,
     discountedPrice: isDiscountActive ? (product.discountedPrice ?? product.DiscountedPrice) : null,
   } : {}
+
+  const handleAddToCartDetail = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!token) {
+        navigate('/login')
+        return
+      }
+      if (!product) return
+      if (p.quantity <= 0) return
+      addToCart({
+        id: product.id,
+        name: p.name,
+        price: p.price,
+        discountedPrice: p.discountedPrice,
+        discountSize: p.discountSize,
+        userId: product.userId ?? null,
+        imageUrl:
+          selectedImage && images.length > 0
+            ? `${API_BASE}/api/products/${id}/images/${selectedImage}`
+            : null,
+        stock: p.quantity,
+      })
+      setAddedFeedback(true)
+      setTimeout(() => setAddedFeedback(false), 1200)
+    },
+    [token, addToCart, product, p, selectedImage, images, id, navigate]
+  )
 
   const priceChartData = priceHistory.length > 0
     ? (() => {
@@ -266,6 +298,18 @@ export function ProductDetailPage() {
                   {descExpanded ? 'Свернуть' : 'Развернуть'}
                 </button>
               )}
+            </div>
+          )}
+
+          {!isOwner && p.quantity > 0 && (
+            <div className="product-detail-actions">
+              <button
+                className="btn btn-primary-navy"
+                onClick={handleAddToCartDetail}
+                disabled={addedFeedback}
+              >
+                {addedFeedback ? '✓ Добавлено' : '🛒 В корзину'}
+              </button>
             </div>
           )}
 

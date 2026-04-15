@@ -44,8 +44,14 @@ export function Layout() {
         </div>
       </header>
 
-
-      <Outlet />
+      <main className="container page">
+        {user ? (
+          <div className="muted" style={{ marginBottom: 12 }}>
+            Вошли как <span style={{ fontWeight: 700 }}>{user.nickname || user.email}</span>
+          </div>
+        ) : null}
+        <Outlet />
+      </main>
     </>
   )
 }

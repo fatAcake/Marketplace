@@ -8,7 +8,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OrdersController : ControllerBase
+    public class OrdersController : BaseApiController
     {
         private readonly IOrdersCrudService _ordersService;
         private readonly ILogger<OrdersController> _logger;
@@ -23,11 +23,11 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             if (dto.Items == null || dto.Items.Count == 0)
-                return BadRequest(new { error = "Заказ должен содержать хотя бы один товар" });
+                return BadRequestError("Заказ должен содержать хотя бы один товар");
 
             try
             {
@@ -37,16 +37,15 @@ namespace backend.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при создании заказа");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при создании заказа");
             }
         }
 
@@ -62,8 +61,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении заказов пользователя");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при получении заказов пользователя");
             }
         }
 
@@ -77,7 +75,7 @@ namespace backend.Controllers
                 var order = await _ordersService.GetOrderByIdAsync(id, userId);
 
                 if (order == null)
-                    return NotFound(new { error = "Заказ не найден" });
+                    return NotFoundError("Заказ не найден");
 
                 return Ok(order);
             }
@@ -87,8 +85,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении заказа {OrderId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при получении заказа {id}");
             }
         }
 
@@ -96,8 +93,8 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] OrderStatusUpdateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             try
             {
@@ -107,16 +104,15 @@ namespace backend.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при обновлении статуса заказа {OrderId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при обновлении статуса заказа {id}");
             }
         }
     }

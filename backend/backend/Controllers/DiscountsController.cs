@@ -8,7 +8,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DiscountsController : ControllerBase
+    public class DiscountsController : BaseApiController
     {
         private readonly IDiscountsCrudService _discountsService;
         private readonly ILogger<DiscountsController> _logger;
@@ -24,8 +24,8 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> CreateDiscount([FromBody] DiscountCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             try
             {
@@ -35,16 +35,15 @@ namespace backend.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при создании скидки для товара {ProductId}", dto.ProductId);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при создании скидки для товара {dto.ProductId}");
             }
         }
 
@@ -59,8 +58,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении всех скидок");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при получении всех скидок");
             }
         }
 
@@ -73,14 +71,13 @@ namespace backend.Controllers
                 var discount = await _discountsService.GetDiscountByIdAsync(id);
 
                 if (discount == null)
-                    return NotFound(new { error = "Скидка не найдена" });
+                    return NotFoundError("Скидка не найдена");
 
                 return Ok(discount);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении скидки {DiscountId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при получении скидки {id}");
             }
         }
 
@@ -95,8 +92,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении скидок для товара {ProductId}", productId);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при получении скидок для товара {productId}");
             }
         }
 
@@ -104,8 +100,8 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateDiscount(int id, [FromBody] DiscountUpdateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             try
             {
@@ -113,22 +109,21 @@ namespace backend.Controllers
                 var discount = await _discountsService.UpdateDiscountAsync(id, dto, userId);
 
                 if (discount == null)
-                    return NotFound(new { error = "Скидка не найдена" });
+                    return NotFoundError("Скидка не найдена");
 
                 return Ok(discount);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при обновлении скидки {DiscountId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при обновлении скидки {id}");
             }
         }
 
@@ -142,18 +137,17 @@ namespace backend.Controllers
                 var result = await _discountsService.DeleteDiscountAsync(id, userId);
 
                 if (!result)
-                    return NotFound(new { error = "Скидка не найдена" });
+                    return NotFoundError("Скидка не найдена");
 
-                return Ok(new { message = "Скидка удалена" });
+                return OkMessage("Скидка удалена");
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при удалении скидки {DiscountId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при удалении скидки {id}");
             }
         }
     }

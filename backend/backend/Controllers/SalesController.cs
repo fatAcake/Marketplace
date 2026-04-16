@@ -7,7 +7,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SalesController : ControllerBase
+    public class SalesController : BaseApiController
     {
         private readonly IOrdersCrudService _ordersService;
         private readonly ILogger<SalesController> _logger;
@@ -30,8 +30,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении продаж продавца");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при получении продаж продавца");
             }
         }
     }

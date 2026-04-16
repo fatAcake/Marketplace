@@ -7,7 +7,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AnalyticsController : ControllerBase
+    public class AnalyticsController : BaseApiController
     {
         private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<AnalyticsController> _logger;
@@ -32,8 +32,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении аналитики продаж");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при получении аналитики продаж");
             }
         }
 
@@ -48,8 +47,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении аналитики цен");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при получении аналитики цен");
             }
         }
     }

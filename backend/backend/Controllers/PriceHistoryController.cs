@@ -7,7 +7,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/products/{productId}/[controller]")]
-    public class PriceHistoryController : ControllerBase
+    public class PriceHistoryController : BaseApiController
     {
         private readonly IPriceHistoryService _priceHistoryService;
         private readonly ILogger<PriceHistoryController> _logger;
@@ -30,8 +30,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении истории цен для товара {ProductId}", productId);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при получении истории цен для товара {productId}");
             }
         }
 
@@ -39,8 +38,8 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> AddPriceHistory(int productId, [FromBody] PriceHistoryCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             try
             {
@@ -56,12 +55,11 @@ namespace backend.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequestError(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при добавлении записи истории цен для товара {ProductId}", productId);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при добавлении записи истории цен для товара {productId}");
             }
         }
     }

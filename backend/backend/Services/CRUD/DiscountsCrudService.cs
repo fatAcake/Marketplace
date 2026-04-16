@@ -22,18 +22,7 @@ namespace backend.Services.CRUD
         public async Task<DiscountDto> CreateDiscountAsync(DiscountCreateDto dto, int userId)
         {
             // Проверка: только владелец товара может создать скидку
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.id == dto.ProductId && !p.deleted);
-
-            if (product == null)
-            {
-                throw new InvalidOperationException("Товар не найден");
-            }
-
-            if (product.user_id != userId)
-            {
-                throw new UnauthorizedAccessException("Только владелец товара может создавать скидку");
-            }
+            await Methods.CheckProductOwnershipAsync(_context, dto.ProductId, userId, "создавать скидку");
 
             // Получаем старую скидку для истории
             var oldDiscount = await _context.Discounts
@@ -106,13 +95,7 @@ namespace backend.Services.CRUD
             if (discount == null) return null;
 
             // Проверка: только владелец товара может обновить скидку
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.id == discount.product_id && !p.deleted);
-
-            if (product == null || product.user_id != userId)
-            {
-                throw new UnauthorizedAccessException("Только владелец товара может обновлять скидку");
-            }
+            await Methods.CheckProductOwnershipAsync(_context, discount.product_id, userId, "обновлять скидку");
 
             var oldDiscount = discount.size;
 
@@ -147,13 +130,7 @@ namespace backend.Services.CRUD
             if (discount == null) return false;
 
             // Проверка: только владелец товара может удалить скидку
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.id == discount.product_id && !p.deleted);
-
-            if (product == null || product.user_id != userId)
-            {
-                throw new UnauthorizedAccessException("Только владелец товара может удалять скидку");
-            }
+            await Methods.CheckProductOwnershipAsync(_context, discount.product_id, userId, "удалять скидку");
 
             var oldDiscount = discount.size;
 

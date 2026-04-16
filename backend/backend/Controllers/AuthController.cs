@@ -1,17 +1,19 @@
 ﻿using System.Security.Claims;
 using backend.DTO.Auth;
+using backend.Models;
 using backend.Services;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 
 namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseApiController
     {
         private readonly IUserCrudService _userService;
         private readonly IMemoryCache _cache;
@@ -63,15 +65,8 @@ namespace backend.Controllers
 
             await _emailSender.SendEmailAsync(user.email,
                 "Код подтверждения регистрации",
-                $@"<html>
-                    <body style='font-family: Arial, sans-serif;'>
-                        <h2>Привет, {user.nickname}!</h2>
-                        <p>Ваш код подтверждения:</p>
-                        <h1 style='background: #f0f0f0; padding: 20px; text-align: center; letter-spacing: 5px; font-size: 32px;'>{code}</h1>
-                        <p>Код действителен <strong>10 минут</strong>.</p>
-                        <p>Если вы не регистрировались, просто проигнорируйте это письмо.</p>
-                    </body>
-                   </html>");
+                Methods.GetHTMLMessage(user, code)
+            );
 
             _logger.LogInformation("Код подтверждения отправлен на {Email}", user.email);
             return Ok(new { message = "Код подтверждения отправлен на email" });
@@ -90,35 +85,20 @@ namespace backend.Controllers
 
             var cacheKey = $"email_verify_{request.email}";
 
-            if (!_cache.TryGetValue(cacheKey, out string? storedCode))
+            (bool flowControl, IActionResult value) = CheckVerificationCode(request, cacheKey);
+            if (!flowControl)
             {
-                _logger.LogWarning("Код верификации истёк или не найден для {Email}", request.email);
-                return BadRequest(new { error = "Код истёк или не найден. Запросите новый." });
-            }
-
-            if (storedCode != request.code)
-            {
-                _logger.LogWarning("Неверный код для {Email}", request.email);
-                return BadRequest(new { error = "Неверный код подтверждения" });
+                return value;
             }
 
             var user = await _userService.FindByEmailAsync(request.email);
-            if (user == null)
-            {
-                _logger.LogError("Пользователь не найден после регистрации: {Email}", request.email);
-                return NotFound(new { error = "Пользователь не найден" });
-            }
+            (flowControl, value) = CheckUser(user, true);
+            if (!flowControl) return value;
 
             user.status = "Buyer";
             user.edited_at = DateTime.UtcNow;
 
-            var tokens = await _userService.GenerateTokensAsync(user);
-            await _userService.UpdateRefreshTokenAsync(user, _tokenService.HashToken(tokens.RefreshToken), _tokenService.RefreshTokenExpiresAt);
-
-            _tokenService.SetTokenCookies(Response, tokens.AccessToken, tokens.RefreshToken);
-            _cache.Remove(cacheKey);
-
-            _logger.LogInformation("Email подтверждён, токены выданы: {UserId}, {Email}", user.id, user.email);
+            TokenResult tokens = await CheckGetSetToken(cacheKey, user);
 
             return Ok(new AuthResponse
             {
@@ -129,6 +109,7 @@ namespace backend.Controllers
             });
         }
 
+
         [HttpPost("resend-code")]
         public async Task<IActionResult> ResendCode([FromBody] VerifyEmailCodeRequest request)
         {
@@ -136,11 +117,8 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var user = await _userService.FindByEmailAsync(request.email);
-            if (user == null)
-                return NotFound(new { error = "Пользователь не найден" });
-
-            if (user.status == "User")
-                return BadRequest(new { error = "Email уже подтверждён" });
+            (bool flowControl, IActionResult value) = CheckUser(user);
+            if (!flowControl) return value;
 
             var rateLimitKey = $"register_attempt_{user.email}";
             if (_cache.TryGetValue(rateLimitKey, out _))
@@ -154,14 +132,7 @@ namespace backend.Controllers
             await _emailSender.SendEmailAsync(
                 user.email,
                 "Новый код подтверждения",
-                $@"<html>
-                    <body style='font-family: Arial, sans-serif;'>
-                        <h2>Привет, {user.nickname}!</h2>
-                        <p>Ваш новый код подтверждения:</p>
-                        <h1 style='background: #f0f0f0; padding: 20px; text-align: center; letter-spacing: 5px; font-size: 32px;'>{code}</h1>
-                        <p>Код действителен <strong>10 минут</strong>.</p>
-                    </body>
-                   </html>");
+                Methods.GetHTMLMessage(user, code));
 
             return Ok(new { message = "Новый код отправлен на email" });
         }
@@ -178,11 +149,8 @@ namespace backend.Controllers
             }
 
             var user = await _userService.FindByEmailAsync(request.email);
-            if (user == null)
-            {
-                _logger.LogWarning("Пользователь не найден при входе: {Email}", request.email);
-                return Unauthorized("Неверные учётные данные");
-            }
+            (bool flowControl, IActionResult value) = CheckUser(user);
+            if (!flowControl) return value;
 
             try
             {
@@ -222,11 +190,8 @@ namespace backend.Controllers
             }
 
             var user = await _userService.FindByIdAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("Пользователь не найден в БД, UserId: {UserId}", userId);
-                return NotFound("Пользователь не найден");
-            }
+            (bool flowControl, IActionResult value) = CheckUser(user);
+            if (!flowControl) return value;
 
             _logger.LogInformation("Данные пользователя возвращены: {UserId}, {Email}", user.id, user.email);
             return Ok(await _userService.MapToDtoAsync(user));
@@ -291,6 +256,47 @@ namespace backend.Controllers
 
             _tokenService.ClearTokenCookies(Response);
             return Ok(new { message = "Выход выполнен успешно" });
+        }
+
+        private async Task<TokenResult> CheckGetSetToken(string cacheKey, Users user)
+        {
+            var tokens = await _userService.GenerateTokensAsync(user);
+            await _userService.UpdateRefreshTokenAsync(user, _tokenService.HashToken(tokens.RefreshToken), _tokenService.RefreshTokenExpiresAt);
+
+            _tokenService.SetTokenCookies(Response, tokens.AccessToken, tokens.RefreshToken);
+            _cache.Remove(cacheKey);
+
+            _logger.LogInformation("Email подтверждён, токены выданы: {UserId}, {Email}", user.id, user.email);
+            return tokens;
+        }
+
+        private (bool flowControl, IActionResult value) CheckVerificationCode(
+            VerifyEmailCodeRequest request, string cacheKey)
+        {
+            if (!_cache.TryGetValue(cacheKey, out string? storedCode))
+            {
+                _logger.LogWarning("Код верификации истёк или не найден для {Email}", request.email);
+                return (flowControl: false, value: BadRequestError("Код истёк или не найден. Запросите новый."));
+            }
+
+            if (storedCode != request.code)
+            {
+                _logger.LogWarning("Неверный код для {Email}", request.email);
+                return (flowControl: false, value: BadRequestError("Неверный код подтверждения"));
+            }
+
+            return (flowControl: true, value: null);
+        }
+
+        private (bool flowControl, IActionResult value) CheckUser(Users? user, bool? isregister = false)
+        {
+            if (user == null)
+            return (flowControl: false, value: NotFoundError("Пользователь не найден"));
+
+            if (isregister == true)
+                if (user.status != null)
+                    return (flowControl: false, value: BadRequestError("Email уже подтверждён"));
+            return (flowControl: true, value: null);
         }
     }
 }

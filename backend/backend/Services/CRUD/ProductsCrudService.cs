@@ -52,21 +52,7 @@ namespace backend.Services.CRUD
             if (product == null) return null;
 
             // Проверяем активную скидку
-            var now = DateTime.UtcNow;
-            var activeDiscount = await _db.Discounts
-                .AsNoTracking()
-                .Where(d => d.product_id == product.id
-                    && !d.deleted
-                    && (d.start_date == null || d.start_date <= now)
-                    && (d.end_date == null || d.end_date >= now))
-                .FirstOrDefaultAsync();
-
-            decimal? discountSize = activeDiscount?.size;
-            float? discountedPrice = null;
-            if (discountSize.HasValue && discountSize > 0)
-            {
-                discountedPrice = (float)(product.price * (1 - (double)discountSize.Value / 100));
-            }
+            (decimal? discountSize, float? discountedPrice) = await Methods.GetActiveDiscountInfoAsync(_db, product.id, product.price);
 
             return new ProductDto
             {
@@ -79,8 +65,8 @@ namespace backend.Services.CRUD
                 SellerNickName = product.User.nickname,
                 SellerEmail = product.User.email,
                 DiscountSize = discountSize,
-                DiscountStartDate = activeDiscount?.start_date,
-                DiscountEndDate = activeDiscount?.end_date,
+                DiscountStartDate = null, // TODO: add to method if needed
+                DiscountEndDate = null,
                 DiscountedPrice = discountedPrice
             };
         }
@@ -98,21 +84,7 @@ namespace backend.Services.CRUD
 
             foreach (var p in products)
             {
-                var activeDiscount = await _db.Discounts
-                    .AsNoTracking()
-                    .Where(d => d.product_id == p.id
-                        && !d.deleted
-                        && (d.start_date == null || d.start_date <= now)
-                        && (d.end_date == null || d.end_date >= now))
-                    .FirstOrDefaultAsync();
-
-                decimal? discountSize = activeDiscount?.size;
-                float? discountedPrice = null;
-                if (discountSize.HasValue && discountSize > 0)
-                {
-                    discountedPrice = (float)(p.price * (1 - (double)discountSize.Value / 100));
-                }
-
+                (decimal? discountSize, float? discountedPrice) = await Methods.GetActiveDiscountInfoAsync(_db, p.id, p.price);
                 result.Add(new UserProductInfo
                 {
                     ProductId = p.id,

@@ -8,7 +8,7 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
         private readonly IProductsCrudService _productsCrudService;
         private readonly IProductImagesService _productImagesService;
@@ -35,7 +35,7 @@ namespace backend.Controllers
         {
             var product = await _productsCrudService.GetProductByIdAsync(id);
             if (product == null)
-                return NotFound(new { error = "Продукт не найден" });
+                return NotFoundError("Продукт не найден");
 
             return Ok(product);
         }
@@ -63,8 +63,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при создании продукта");
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, "Ошибка при создании продукта");
             }
         }
 
@@ -72,8 +71,8 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] UpdateProductDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validation = ValidateModelState();
+            if (validation != null) return validation;
 
             try
             {
@@ -81,7 +80,7 @@ namespace backend.Controllers
                 var product = await _productsCrudService.UpdateProductAsync(id, dto, userId);
 
                 if (product == null)
-                    return NotFound(new { error = "Продукт не найден" });
+                    return NotFoundError("Продукт не найден");
 
                 return Ok(product);
             }
@@ -91,8 +90,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при обновлении продукта {ProductId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при обновлении продукта {id}");
             }
         }
 
@@ -106,9 +104,9 @@ namespace backend.Controllers
                 var result = await _productsCrudService.DeleteProductAsync(id, userId);
 
                 if (!result)
-                    return NotFound(new { error = "Продукт не найден" });
+                    return NotFoundError("Продукт не найден");
 
-                return Ok(new { message = "Продукт удалён" });
+                return OkMessage("Продукт удалён");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -116,8 +114,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при удалении продукта {ProductId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при удалении продукта {id}");
             }
         }
 
@@ -133,7 +130,7 @@ namespace backend.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(new { error = "Продукт не найден" });
+                return NotFoundError("Продукт не найден");
             }
         }
 
@@ -143,7 +140,7 @@ namespace backend.Controllers
         {
             var result = await _productImagesService.GetImageByIdAsync(id, imageId);
             if (result == null)
-                return NotFound(new { error = "Изображение не найдено" });
+                return NotFoundError("Изображение не найдено");
 
             var (data, contentType) = result.Value;
             return File(data, contentType);
@@ -154,11 +151,11 @@ namespace backend.Controllers
         public async Task<IActionResult> AddProductImage(int id, IFormFile image)
         {
             if (image == null || image.Length == 0)
-                return BadRequest(new { error = "Файл не передан" });
+                return BadRequestError("Файл не передан");
 
             // Проверка размера (макс 5МБ)
             if (image.Length > 5 * 1024 * 1024)
-                return BadRequest(new { error = "Размер файла не должен превышать 5МБ" });
+                return BadRequestError("Размер файла не должен превышать 5МБ");
 
             try
             {
@@ -172,7 +169,7 @@ namespace backend.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(new { error = "Продукт не найден" });
+                return NotFoundError("Продукт не найден");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -180,8 +177,7 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при добавлении картинки к продукту {ProductId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при добавлении картинки к продукту {id}");
             }
         }
 
@@ -195,9 +191,9 @@ namespace backend.Controllers
                 var result = await _productImagesService.DeleteImageAsync(id, imageId, userId);
 
                 if (!result)
-                    return NotFound(new { error = "Изображение не найдено" });
+                    return NotFoundError("Изображение не найдено");
 
-                return Ok(new { message = "Изображение удалено" });
+                return OkMessage("Изображение удалено");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -205,12 +201,11 @@ namespace backend.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(new { error = "Продукт не найден" });
+                return NotFoundError("Продукт не найден");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при удалении картинки {ImageId} из продукта {ProductId}", imageId, id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при удалении картинки {imageId} из продукта {id}");
             }
         }
 
@@ -219,7 +214,7 @@ namespace backend.Controllers
         public async Task<IActionResult> ReorderProductImages(int id, [FromBody] List<int> imageIds)
         {
             if (imageIds == null || imageIds.Count == 0)
-                return BadRequest(new { error = "Список ID изображений пуст" });
+                return BadRequestError("Список ID изображений пуст");
 
             try
             {
@@ -227,9 +222,9 @@ namespace backend.Controllers
                 var result = await _productImagesService.ReorderImagesAsync(id, imageIds, userId);
 
                 if (!result)
-                    return BadRequest(new { error = "Не все изображения найдены" });
+                    return BadRequestError("Не все изображения найдены");
 
-                return Ok(new { message = "Порядок изображений обновлён" });
+                return OkMessage("Порядок изображений обновлён");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -237,12 +232,11 @@ namespace backend.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound(new { error = "Продукт не найден" });
+                return NotFoundError("Продукт не найден");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при изменении порядка картинок продукта {ProductId}", id);
-                return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+                return HandleException(ex, _logger, $"Ошибка при изменении порядка картинок продукта {id}");
             }
         }
         #endregion

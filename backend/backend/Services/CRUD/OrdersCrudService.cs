@@ -59,21 +59,8 @@ namespace backend.Services.CRUD
                     }
 
                     // Получаем активную скидку
-                    decimal? discount = null;
-                    var activeDiscount = await _context.Discounts
-                        .Where(d => d.product_id == product.id
-                            && !d.deleted
-                            && d.start_date <= DateTime.UtcNow
-                            && d.end_date >= DateTime.UtcNow)
-                        .OrderByDescending(d => d.created_at)
-                        .FirstOrDefaultAsync();
-
-                    decimal finalPrice = (decimal)product.price;
-                    if (activeDiscount != null && activeDiscount.size.HasValue)
-                    {
-                        discount = activeDiscount.size.Value;
-                        finalPrice = finalPrice * (1 - discount.Value / 100);
-                    }
+                    var (discountSize, discountedPrice) = await Methods.GetActiveDiscountInfoAsync(_context, product.id, product.price);
+                    decimal finalPrice = (decimal)(discountedPrice ?? product.price);
 
                     var orderItem = new OrderItem
                     {
@@ -81,7 +68,7 @@ namespace backend.Services.CRUD
                         seller_id = product.user_id,
                         quantity = itemDto.Quantity,
                         price_at_buy = (decimal)product.price,
-                        discount_at_buy = discount,
+                        discount_at_buy = discountSize,
                         final_price_at_buy = finalPrice,
                         name_at_buy = product.name
                     };

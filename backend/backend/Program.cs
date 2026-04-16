@@ -1,6 +1,6 @@
-// Program.cs
 using DotNetEnv;
 using backend.Data;
+using backend.Seeders;
 using backend.Services;
 using backend.Services.CRUD;
 using backend.Services.Interfaces;
@@ -67,6 +67,10 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<IUserCrudService, UserCrudService>();
 builder.Services.AddScoped<IProductsCrudService, ProductsCrudService>();
 builder.Services.AddScoped<IProductImagesService, ProductImagesService>();
+builder.Services.AddScoped<IPriceHistoryService, PriceHistoryService>();
+builder.Services.AddScoped<IDiscountsCrudService, DiscountsCrudService>();
+builder.Services.AddScoped<IOrdersCrudService, OrdersCrudService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 builder.Services.AddScoped<IEmailSender>(_ =>
     new EmailSender(
@@ -119,6 +123,30 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Автоматическое применение миграций при запуске
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DBContext>();
+
+    // Проверяем, существует ли база данных
+    var canConnect = await dbContext.Database.CanConnectAsync();
+
+    if (!canConnect)
+    {
+        app.Logger.LogInformation("База данных не найдена. Применяю миграции...");
+
+        // Применяем все миграции
+        await dbContext.Database.MigrateAsync();
+
+        app.Logger.LogInformation("Миграции успешно применены.");
+
+        // ЗАПУСК СИИДЕРА ДЛЯ ЗАПОЛНЕНИЯ БАЗЫ ДАННЫХ
+        // app.Logger.LogInformation("Заполнение базы данных начальными данными...");
+        // await DataSeeder.SeedAsync(app.Services);
+        // app.Logger.LogInformation("Начальные данные успешно загружены.");
+    }
+}
 
 // Включаем Swagger только в Development режиме
 if (app.Environment.IsDevelopment())

@@ -1,0 +1,240 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: #1a1d20;
+    /* Цвет наших карточек */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.modal-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+
+/* Вкладки в модальном окне */
+
+.modal-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0 32px;
+}
+
+.modal-tab {
+    padding: 16px 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    opacity: 0.4;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.modal-tab:hover {
+    opacity: 0.7;
+}
+
+.modal-tab.active {
+    opacity: 1;
+    color: #35c66b;
+    border-bottom-color: #35c66b;
+}
+
+.modal-body {
+    padding: 32px;
+    overflow-y: auto;
+    flex: 1;
+    color: #fff;
+}
+
+
+/* Small modal variant */
+
+.modal-content.modal-sm {
+    max-width: 500px;
+}
+
+
+/* Edit product modal */
+
+.modal-content.modal-edit {
+    display: block;
+    width: 800px;
+    max-width: calc(100vw - 32px);
+    height: 80vh;
+    animation: none;
+}
+
+.modal-content.modal-edit .modal-header {
+    position: sticky;
+    top: 0;
+    background: #1a1d20;
+    z-index: 2;
+}
+
+
+/* Форма редактирования внутри модалки */
+
+.edit-product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-product-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.edit-product-form input,
+.edit-product-form textarea {
+    background: #121517;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 15px;
+    transition: all 0.2s;
+}
+
+.edit-product-form input:focus,
+.edit-product-form textarea:focus {
+    border-color: #35c66b;
+    box-shadow: 0 0 0 4px rgba(53, 198, 107, 0.1);
+    outline: none;
+}
+
+.edit-product-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.edit-product-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.edit-product-hint,
+.edit-product-counter {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 400;
+}
+
+.edit-product-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.edit-product-actions .btn-secondary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.edit-product-actions .btn-primary {
+    background: #35c66b;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(53, 198, 107, 0.3);
+}
+
+@media (max-width: 600px) {
+    .modal-content.modal-edit {
+        width: calc(100vw - 10px);
+        height: 90vh;
+    }
+    .edit-product-row {
+        grid-template-columns: 1fr;
+    }
+}

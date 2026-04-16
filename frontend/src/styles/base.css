@@ -1,0 +1,142 @@
+/* Используем переменные, которые мы создали ранее */
+
+@import url('./variables.css');
+
+/* Базовые настройки страницы */
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    font-family: var(--font-main);
+}
+
+
+/* Контейнер — делаем его таким же, как в макете Starbucks */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+
+/* Шапка (Topbar) */
+
+.topbar {
+    padding: 30px 0;
+    /* Чуть компактнее оригинальных 50px для маркетплейса */
+    background-color: var(--bg-color);
+}
+
+.topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* Логотип Bliss */
+
+.brand {
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    /* Применяем фирменный градиент */
+    background: var(--accent-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: opacity var(--transition-speed);
+}
+
+
+/* Навигация */
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    /* Оптимальный зазор для кнопок в ряд */
+}
+
+
+/* Кнопки (в Layout они используются как ссылки) */
+
+.btn {
+    font-family: var(--font-main);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-speed), opacity var(--transition-speed);
+}
+
+.btn:hover {
+    color: var(--text-white);
+    opacity: 1;
+}
+
+
+/* Акцентная кнопка (Вход / Регистрация) */
+
+.btn.primary {
+    padding: 12px 35px;
+    border-radius: 83px;
+    background: var(--accent-gradient);
+    color: var(--text-white);
+    font-weight: 600;
+}
+
+.btn.primary:hover {
+    box-shadow: 0 4px 15px rgba(53, 198, 107, 0.3);
+}
+
+
+/* Главный контент */
+
+.page {
+    padding-top: 40px;
+    padding-bottom: 80px;
+}
+
+
+/* Информационная строка "Вошли как..." */
+
+.muted {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.muted span {
+    color: var(--text-white);
+}
+
+
+/* Адаптив для мобильных устройств */
+
+@media (max-width: 768px) {
+    .topbar {
+        padding: 20px 0;
+    }
+    .topbar-inner {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .brand {
+        font-size: 28px;
+    }
+    .nav {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn {
+        font-size: 14px;
+    }
+}

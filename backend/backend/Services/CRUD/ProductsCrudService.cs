@@ -10,12 +10,14 @@ namespace backend.Services.CRUD
     {
         private readonly DBContext _db;
         private readonly IProductImagesService _productImagesService;
+        private readonly IPriceHistoryService _priceHistoryService;
         private readonly ILogger<ProductsCrudService> _logger;
 
-        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, ILogger<ProductsCrudService> logger)
+        public ProductsCrudService(DBContext db, IProductImagesService productImagesService, IPriceHistoryService priceHistoryService, ILogger<ProductsCrudService> logger)
         {
             _db = db;
             _productImagesService = productImagesService;
+            _priceHistoryService = priceHistoryService;
             _logger = logger;
         }
 
@@ -41,43 +43,65 @@ namespace backend.Services.CRUD
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
-            return await _db.Products
+            var product = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.User)
                 .Where(p => !p.deleted)
-                .Select(p => new ProductDto
-                {
-                    Id = p.id,
-                    Name = p.name,
-                    Price = p.price,
-                    Quantity = p.quantity,
-                    Description = p.description,
-                    UserId = p.user_id,
-                    SellerNickName = p.User.nickname,
-                    SellerEmail = p.User.email
-                })
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.id == id);
+
+            if (product == null) return null;
+
+            // Проверяем активную скидку
+            (decimal? discountSize, float? discountedPrice) = await Methods.GetActiveDiscountInfoAsync(_db, product.id, product.price);
+
+            return new ProductDto
+            {
+                Id = product.id,
+                Name = product.name,
+                Price = product.price,
+                Quantity = product.quantity,
+                Description = product.description,
+                UserId = product.user_id,
+                SellerNickName = product.User.nickname,
+                SellerEmail = product.User.email,
+                DiscountSize = discountSize,
+                DiscountStartDate = null, // TODO: add to method if needed
+                DiscountEndDate = null,
+                DiscountedPrice = discountedPrice
+            };
         }
 
         public async Task<List<UserProductInfo>> GetProductsByUserIdAsync(int userId)
         {
-            return await _db.Products
+            var products = await _db.Products
                 .AsNoTracking()
                 .Include(p => p.User)
                 .Where(p => !p.deleted && p.user_id == userId)
-                .Select(p => new UserProductInfo
+                .ToListAsync();
+
+            var now = DateTime.UtcNow;
+            var result = new List<UserProductInfo>();
+
+            foreach (var p in products)
+            {
+                (decimal? discountSize, float? discountedPrice) = await Methods.GetActiveDiscountInfoAsync(_db, p.id, p.price);
+                result.Add(new UserProductInfo
                 {
                     ProductId = p.id,
                     Name = p.name,
                     Price = p.price,
                     Quantity = p.quantity,
                     Description = p.description,
+                    DiscountSize = discountSize,
+                    DiscountedPrice = discountedPrice,
                     SellerUserId = p.user_id,
                     NickName = p.User.nickname,
                     Email = p.User.email,
                     SellerStatus = p.User.status
-                })
-                .ToListAsync();
+                });
+            }
+
+            return result;
         }
 
         public async Task<ProductDto> CreateProductAsync(CreateProductDto dto, int userId)
@@ -145,6 +169,50 @@ namespace backend.Services.CRUD
             if (product.user_id != userId)
                 throw new UnauthorizedAccessException("Вы не являетесь владельцем этого продукта");
 
+            // Сохраняем старые значения для истории
+            var oldPrice = dto.Price.HasValue ? (decimal?)product.price : null;
+            var newPrice = dto.Price.HasValue ? (decimal?)dto.Price.Value : null;
+
+            // Получаем текущую активную скидку
+            var currentDiscount = await _db.Discounts
+                .Where(d => d.product_id == product.id && !d.deleted)
+                .OrderByDescending(d => d.created_at)
+                .FirstOrDefaultAsync();
+
+            var oldDiscount = currentDiscount?.size;
+
+            // Определяем новый размер скидки
+            decimal? newDiscount = null;
+            bool discountChanged = false;
+
+            if (dto.DiscountSize.HasValue || dto.DiscountStartDate.HasValue || dto.DiscountEndDate.HasValue)
+            {
+                discountChanged = true;
+                newDiscount = dto.DiscountSize ?? currentDiscount?.size;
+
+                // Обновляем или создаём скидку
+                if (currentDiscount != null)
+                {
+                    currentDiscount.size = dto.DiscountSize ?? currentDiscount.size;
+                    currentDiscount.start_date = dto.DiscountStartDate?.UtcDateTime ?? currentDiscount.start_date;
+                    currentDiscount.end_date = dto.DiscountEndDate?.UtcDateTime ?? currentDiscount.end_date;
+                    currentDiscount.edited_at = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Создаём новую скидку
+                    var newDiscountEntity = new Discount
+                    {
+                        product_id = product.id,
+                        size = dto.DiscountSize ?? 0,
+                        start_date = dto.DiscountStartDate?.UtcDateTime ?? DateTime.UtcNow,
+                        end_date = dto.DiscountEndDate?.UtcDateTime ?? DateTime.UtcNow.AddDays(30),
+                        created_at = DateTime.UtcNow
+                    };
+                    _db.Discounts.Add(newDiscountEntity);
+                }
+            }
+
             // Обновляем только переданные поля
             if (!string.IsNullOrEmpty(dto.Name))
                 product.name = dto.Name;
@@ -158,6 +226,19 @@ namespace backend.Services.CRUD
             product.edited_at = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
+
+            // Записываем изменение цены и/или скидки в историю
+            if (dto.Price.HasValue || discountChanged)
+            {
+                await _priceHistoryService.RecordPriceChangeAsync(
+                    product.id,
+                    oldPrice,
+                    newPrice,
+                    oldDiscount,
+                    discountChanged ? newDiscount : oldDiscount,
+                    userId
+                );
+            }
 
             _logger.LogInformation("Продукт обновлён: {ProductId}, пользователь: {UserId}", id, userId);
 

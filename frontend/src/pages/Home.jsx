@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth.js'
 import { useCart } from '../cart/useCart.js'
 import * as productsApi from '../api/products.js'
-import '../styles/Home.css?v=1.1'
+import '../styles/Home.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5035'
 

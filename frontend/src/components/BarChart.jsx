@@ -5,7 +5,7 @@ import { useMemo } from 'react'
  * @param {object[]} data — [{ label, value }, ...]
  * @param {string} color
  */
-export function BarChart({ data, color = '#111' }) {
+export function BarChart({ data }) {
   const bars = useMemo(() => {
     if (!data || data.length === 0) return null
     const maxVal = Math.max(...data.map((d) => d.value), 1)
@@ -16,7 +16,7 @@ export function BarChart({ data, color = '#111' }) {
   }, [data])
 
   if (!bars || bars.length === 0) {
-    return <p className="text-navy">Нет данных для отображения</p>
+    return <p className="stats-empty-text">Нет данных для отображения</p>
   }
 
   return (
@@ -27,9 +27,11 @@ export function BarChart({ data, color = '#111' }) {
           <div className="bar-track">
             <div
               className="bar-fill"
-              style={{ width: `${b.pct}%`, background: color }}
+              style={{ width: `${b.pct}%` }} // Оставляем только динамическую ширину
             />
-            <span className="bar-value">{typeof b.value === 'number' ? Math.round(b.value).toLocaleString('ru-RU') : b.value}</span>
+            <span className="bar-value">
+              {typeof b.value === 'number' ? Math.round(b.value).toLocaleString('ru-RU') : b.value}
+            </span>
           </div>
         </div>
       ))}

@@ -29,7 +29,7 @@ export function HomePage() {
     try {
       const data = await productsApi.getProducts(token)
       const productsData = Array.isArray(data) ? data : []
-      
+
       const productsWithImages = await Promise.all(
         productsData.map(async (product) => {
           try {
@@ -41,7 +41,7 @@ export function HomePage() {
           }
         })
       )
-      
+
       setProducts(productsWithImages)
       setFilteredProducts(productsWithImages)
     } catch (err) {
@@ -72,12 +72,12 @@ export function HomePage() {
       navigate('/login')
       return
     }
-    
+
     const sellerId = product.userId ?? product.UserId
     if (user && sellerId != null && user.id === sellerId) return
 
     const productId = getProductId(product)
-    const imageUrl = product.imageId 
+    const imageUrl = product.imageId
       ? `${API_BASE}/api/products/${productId}/images/${product.imageId}`
       : null
 
@@ -91,7 +91,7 @@ export function HomePage() {
       userId: sellerId,
       imageUrl,
     })
-    
+
     setAddedId(productId)
     setTimeout(() => setAddedId(null), 1200)
   }, [token, user, addToCart, navigate])
@@ -103,7 +103,7 @@ export function HomePage() {
   const getProductId = (p) => p.id || p.Id
 
   if (loading) {
-    return <div className="loading-container">Загрузка товаров...</div>
+    return <div className="loading-container"><div className="spinner"></div><p>Загрузка товаров...</p></div>
   }
   if (error) {
     return (
@@ -115,7 +115,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="home-page">
+    <div className="home-page marketplace">
       <header className="header">
         <div className="header-top">
           <div className="container">
@@ -123,11 +123,11 @@ export function HomePage() {
               <Link to="/" className="logo">
                 <span className="logo-text">BLISS</span>
               </Link>
-              
+
               <div className="search-bar">
-                <input 
-                  type="text" 
-                  placeholder="Поиск товаров..." 
+                <input
+                  type="text"
+                  placeholder="Поиск по маркетплейсу..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -136,22 +136,17 @@ export function HomePage() {
               <div className="header-actions">
                 {!token ? (
                   <>
-                    <Link to="/login" className="btn-outline">Войти</Link>
+                    <Link to="/login" className="btn-outline">Вход</Link>
                     <Link to="/register" className="btn-primary">Регистрация</Link>
                   </>
                 ) : (
                   <>
                     <Link to="/cart" className="cart-link">
-                      Корзина 
+                      Корзина
                     </Link>
                     <Link to="/me" className="profile-link">
                       <span className="username">{user?.nickname || user?.name || 'Профиль'}</span>
                     </Link>
-                    {/* {user?.status === 'Saller' && (
-                      <Link to="/seller/products" className="btn-outline seller-btn">
-                        Мои товары
-                      </Link>
-                    )} */}
                   </>
                 )}
               </div>
@@ -165,8 +160,8 @@ export function HomePage() {
           <section className="banner">
             <div className="banner-content">
               <h1>Добро пожаловать в BLISS</h1>
-              <p>Покупайте и продавайте товары онлайн</p>
-              <Link to="/products" className="btn-primary btn-large">Все товары</Link>
+              <p>Качественные товары и уникальный опыт шопинга</p>
+              <Link to="/products" className="btn-primary btn-large">Смотреть каталог</Link>
             </div>
           </section>
 
@@ -174,89 +169,69 @@ export function HomePage() {
             <section className="become-seller-card">
               <div className="seller-promo">
                 <div className="promo-text">
-                  <h3>Станьте продавцом</h3>
-                  <p>Продавайте свои товары на нашей площадке и зарабатывайте</p>
+                  <h3>Откройте свой магазин</h3>
+                  <p>Продавайте свои товары миллионам пользователей BLISS</p>
                 </div>
-                <Link to="/become-seller" className="btn-primary">Начать продавать</Link>
+                <Link to="/become-seller" className="btn-primary">Начать продажи</Link>
               </div>
             </section>
           )}
 
+          {/* Сетка товаров */}
           <section className="products-section">
             <div className="section-header">
               <h2>
-                {searchQuery.trim() !== '' 
-                  ? `Результаты поиска (${filteredProducts.length})` 
-                  : 'Популярные товары'}
+                {searchQuery.trim() !== ''
+                  ? `Результаты поиска (${filteredProducts.length})`
+                  : 'Популярные предложения'}
               </h2>
-              <Link to="/products" className="view-all">Смотреть все</Link>
+              <Link to="/products" className="view-all">Все товары</Link>
             </div>
-            
+
             {filteredProducts.length === 0 ? (
               <div className="no-products">
-                <p>{searchQuery.trim() !== '' ? 'Товары не найдены' : 'Товары пока не добавлены'}</p>
+                <p>{searchQuery.trim() !== '' ? 'Ничего не нашли' : 'Товары скоро появятся'}</p>
               </div>
             ) : (
               <div className="products-grid">
                 {filteredProducts.map(product => {
                   const productId = getProductId(product)
-                  const imageUrl = product.imageId 
+                  const imageUrl = product.imageId
                     ? `${API_BASE}/api/products/${productId}/images/${product.imageId}`
                     : null
-                  
                   const qty = getProductQuantity(product)
-                  const isOwner = user && product.userId != null && user.id === product.userId
+                  const isOwner = user && (product.userId ?? product.UserId) != null && user.id === (product.userId ?? product.UserId)
 
                   return (
                     <div key={productId} className="product-card">
                       <Link to={`/products/${productId}`} className="product-image-link">
                         <div className="product-image">
                           {imageUrl ? (
-                            <img 
-                              src={imageUrl}
-                              alt={getProductName(products)}
-                              onError={(e) => {
-                                e.target.style.display = 'none'
-                                const noImageDiv = e.target.parentElement?.querySelector('.no-image')
-                                if (noImageDiv) noImageDiv.style.display = 'flex'
-                              }}
-                            />
-                          ) : null}
-                          <div className="no-image" style={{ display: !imageUrl ? 'flex' : 'none' }}>
-                            <span className="no-image-text">Нет фото</span>
-                          </div>
+                            <img src={imageUrl} alt={getProductName(product)} />
+                          ) : (
+                            <div className="no-image"><span className="no-image-text">BLISS</span></div>
+                          )}
                         </div>
                       </Link>
-                      
+
                       <div className="product-info">
-                        <Link to={`/product/${productId}`} className="product-name">
+                        <Link to={`/products/${productId}`} className="product-name">
                           {getProductName(product)}
                         </Link>
                         <div className="product-price">
-                          <span className="current-price">{getProductPrice(product)} ₽</span>
+                          <span className="current-price">{getProductPrice(product).toLocaleString()} ₽</span>
                         </div>
-                        <span className="product-seller">{getProductSeller(product)}</span>
                         <span className={`stock ${qty > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                          {qty > 0 ? `В наличии: ${qty} шт.` : 'Нет в наличии'}
+                          {qty > 0 ? `В наличии: ${qty} шт.` : 'Под заказ'}
                         </span>
                       </div>
 
-                      <button 
-                        className="add-to-cart-btn" 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleAddToCart(product)
-                        }}
+                      <button
+                        className="add-to-cart-btn"
+                        onClick={() => handleAddToCart(product)}
                         disabled={qty === 0 || addedId === productId || isOwner}
                       >
-                        {isOwner 
-                          ? 'Ваш товар' 
-                          : qty === 0 
-                          ? 'Нет в наличии' 
-                          : addedId === productId 
-                          ? '✓ Добавлено' 
-                          : 'В корзину'}
+                        {isOwner ? 'Ваш товар' : qty === 0 ? 'Распродано' : addedId === productId ? '✓ В корзине' : 'Добавить'}
                       </button>
                     </div>
                   )
@@ -265,10 +240,20 @@ export function HomePage() {
             )}
           </section>
 
+          {/* Преимущества */}
           <section className="features">
-            <div className="feature-item"><h4>Быстрая доставка</h4><p>Доставляем по всей стране</p></div>
-            <div className="feature-item"><h4>Безопасная сделка</h4><p>Гарантия возврата средств</p></div>
-            <div className="feature-item"><h4>Поддержка 24/7</h4><p>Всегда на связи</p></div>
+            <div className="feature-item">
+              <h4>Global Delivery</h4>
+              <p>Бережная доставка до ваших дверей</p>
+            </div>
+            <div className="feature-item">
+              <h4>Secure Deal</h4>
+              <p>Защита платежей мирового уровня</p>
+            </div>
+            <div className="feature-item">
+              <h4>Priority Support</h4>
+              <p>Личный менеджер 24/7</p>
+            </div>
           </section>
         </div>
       </main>
@@ -276,12 +261,33 @@ export function HomePage() {
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
-            <div className="footer-section"><h4>BLISS</h4><p>Лучший маркетплейс для покупок и продаж</p></div>
-            <div className="footer-section"><h4>Покупателям</h4><ul><li><Link to="/help">Как купить</Link></li><li><Link to="/returns">Возврат</Link></li><li><Link to="/questions">Вопросы и ответы</Link></li></ul></div>
-            <div className="footer-section"><h4>Продавцам</h4><ul><li><Link to="/seller/guide">Как продавать</Link></li><li><Link to="/seller/rules">Правила</Link></li><li><Link to="/seller/support">Поддержка продавцов</Link></li></ul></div>
-            <div className="footer-section"><h4>Контакты</h4><ul><li>support@bliss.ru</li><li>8 (800) 123-45-67</li></ul></div>
+            <div className="footer-section">
+              <h4 className="brand">BLISS</h4>
+              <p>Ваш проводник в мире покупок.</p>
+            </div>
+            <div className="footer-section">
+              <h4>Сервис</h4>
+              <ul>
+                <li><Link to="/help">Поддержка</Link></li>
+                <li><Link to="/returns">Гарантия</Link></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h4>Бизнес</h4>
+              <ul>
+                <li><Link to="/seller/guide">Партнерство</Link></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h4>Связь</h4>
+              <ul>
+                <li>8 (800) 123-45-67</li>
+              </ul>
+            </div>
           </div>
-          <div className="footer-bottom"><p>2025 BLISS. Все права защищены.</p></div>
+          <div className="footer-bottom">
+            <p>© 2026 BLISS MARKETPLACE. Все права защищены.</p>
+          </div>
         </div>
       </footer>
     </div>

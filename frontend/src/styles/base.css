@@ -1,207 +1,142 @@
-.container {
-  width: min(860px, 100%);
-  margin: 0 auto;
+/* Используем переменные, которые мы создали ранее */
+
+@import url('./variables.css');
+
+/* Базовые настройки страницы */
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    font-family: var(--font-main);
 }
 
+
+/* Контейнер — делаем его таким же, как в макете Starbucks */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+
+/* Шапка (Topbar) */
+
 .topbar {
-  margin-bottom: 16px;
+    padding: 30px 0;
+    /* Чуть компактнее оригинальных 50px для маркетплейса */
+    background-color: var(--bg-color);
 }
 
 .topbar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+
+
+/* Логотип Bliss */
 
 .brand {
-  font-weight: 700;
-  color: inherit;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    /* Применяем фирменный градиент */
+    background: var(--accent-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: opacity var(--transition-speed);
 }
+
+
+/* Навигация */
 
 .nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    /* Оптимальный зазор для кнопок в ряд */
 }
 
-.page {
-  padding: 0;
-}
 
-.card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 12px;
-}
+/* Кнопки (в Layout они используются как ссылки) */
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-@media (min-width: 860px) {
-  .grid.two {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.muted {
-  color: #555;
-}
-
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
-  word-break: break-all;
-}
-
-.text-navy {
-  color: #111;
-}
-
-/* — Кнопки — */
 .btn {
-  appearance: none;
-  border: 1px solid #ccc;
-  background: #f6f6f6;
-  color: #111;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
+    font-family: var(--font-main);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-speed), opacity var(--transition-speed);
 }
 
 .btn:hover {
-  background: #eee;
+    color: var(--text-white);
+    opacity: 1;
 }
 
-.btn:active {
-  transform: none;
-}
+
+/* Акцентная кнопка (Вход / Регистрация) */
 
 .btn.primary {
-  background: #111;
-  border-color: #111;
-  color: #fff;
+    padding: 12px 35px;
+    border-radius: 83px;
+    background: var(--accent-gradient);
+    color: var(--text-white);
+    font-weight: 600;
 }
 
-.btn-sm {
-  padding: 4px 10px;
-  font-size: 13px;
+.btn.primary:hover {
+    box-shadow: 0 4px 15px rgba(53, 198, 107, 0.3);
 }
 
-.btn-lg {
-  padding: 12px 32px;
-  font-size: 16px;
+
+/* Главный контент */
+
+.page {
+    padding-top: 40px;
+    padding-bottom: 80px;
 }
 
-.btn-outline {
-  background: transparent !important;
-  border-color: #111 !important;
-  color: #111 !important;
+
+/* Информационная строка "Вошли как..." */
+
+.muted {
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
 }
 
-.btn-outline:hover {
-  background: var(--gray-400) !important;
+.muted span {
+    color: var(--text-white);
 }
 
-.btn-primary-navy {
-  background: #111 !important;
-  border-color: #111 !important;
-  color: #fff !important;
-}
 
-.btn-primary-navy:hover {
-  opacity: 0.9;
-}
+/* Адаптив для мобильных устройств */
 
-.btn-danger-outline {
-  background: transparent !important;
-  border-color: var(--danger) !important;
-  color: var(--danger) !important;
-}
-
-.btn-danger-outline:hover {
-  background: var(--danger) !important;
-  color: #fff !important;
-}
-
-.btn-edit {
-  background: transparent !important;
-  border-color: #0b57d0 !important;
-  color: #0b57d0 !important;
-}
-
-.btn-edit:hover {
-  background: #0b57d0 !important;
-  color: #fff !important;
-}
-
-.btn-back-link {
-  display: inline-block;
-  margin-bottom: 12px;
-  background: transparent !important;
-  border-color: #111 !important;
-  color: #111 !important;
-  text-decoration: none;
-}
-
-.btn-back {
-  background: transparent !important;
-  border-color: #111 !important;
-  color: #111 !important;
-  margin-bottom: 16px;
-}
-
-/* — Формы — */
-label {
-  display: grid;
-  gap: 4px;
-  font-weight: 600;
-}
-
-input {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  color: #111;
-  outline: none;
-}
-
-input:focus {
-  border-color: #0b57d0;
-}
-
-/* — Алерты — */
-.alert {
-  border-radius: 6px;
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  background: #fafafa;
-}
-
-.alert.error {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-.alert.ok {
-  border-color: var(--ok);
-  color: var(--ok);
-}
-
-.me-1 {
-  margin-right: 4px;
+@media (max-width: 768px) {
+    .topbar {
+        padding: 20px 0;
+    }
+    .topbar-inner {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .brand {
+        font-size: 28px;
+    }
+    .nav {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn {
+        font-size: 14px;
+    }
 }

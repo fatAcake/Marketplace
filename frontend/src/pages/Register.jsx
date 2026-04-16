@@ -20,23 +20,23 @@ export function RegisterPage() {
   }, [password, confirmPassword])
 
   return (
-    <section className="card" style={{ maxWidth: 620, margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>Регистрация</h2>
+    <section className="auth-card register-card">
+      <h2 className="auth-title">Регистрация</h2>
 
       {error ? (
-        <div className="alert error" style={{ marginTop: 12 }}>
+        <div className="alert error">
           {error}
         </div>
       ) : null}
+      
       {ok ? (
-        <div className="alert ok" style={{ marginTop: 12 }}>
+        <div className="alert ok">
           {ok}
         </div>
       ) : null}
 
       <form
-        className="grid"
-        style={{ marginTop: 14 }}
+        className="auth-form"
         onSubmit={async (e) => {
           e.preventDefault()
           setError('')
@@ -56,19 +56,30 @@ export function RegisterPage() {
           }
         }}
       >
-        <div className="grid two">
-          <label>
-            Никнейм
-            <input value={nickname} onChange={(e) => setNickname(e.target.value)} autoComplete="nickname" />
-          </label>
-          <label>
-            Email
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" required />
-          </label>
+        <div className="form-row">
+          <div className="input-group">
+            <label>Никнейм</label>
+            <input 
+              value={nickname} 
+              onChange={(e) => setNickname(e.target.value)} 
+              autoComplete="nickname" 
+            />
+          </div>
+          <div className="input-group">
+            <label>Email</label>
+            <input 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              type="email" 
+              autoComplete="email" 
+              required 
+            />
+          </div>
         </div>
-        <div className="grid two">
-          <label>
-            Пароль
+
+        <div className="form-row">
+          <div className="input-group">
+            <label>Пароль</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -76,9 +87,9 @@ export function RegisterPage() {
               autoComplete="new-password"
               required
             />
-          </label>
-          <label>
-            Подтверждение пароля
+          </div>
+          <div className="input-group">
+            <label>Подтверждение</label>
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -86,20 +97,20 @@ export function RegisterPage() {
               autoComplete="new-password"
               required
             />
-          </label>
+          </div>
         </div>
 
         {passwordMismatch ? (
-          <div className="alert error" style={{ marginTop: 6 }}>
+          <div className="alert error">
             Пароли не совпадают
           </div>
         ) : null}
 
-        <div className="row" style={{ marginTop: 6 }}>
-          <button className="btn primary" disabled={busy}>
+        <div className="auth-actions">
+          <button className="btn-primary-glow" disabled={busy}>
             {busy ? 'Регистрируем…' : 'Зарегистрироваться'}
           </button>
-          <Link className="btn" to="/login">
+          <Link className="btn-secondary-link" to="/login">
             Уже есть аккаунт
           </Link>
         </div>
@@ -107,4 +118,3 @@ export function RegisterPage() {
     </section>
   )
 }
-

@@ -209,7 +209,7 @@ export function HomePage() {
 
                   return (
                     <div key={productId} className="product-card">
-                      <Link to={`/product/${productId}`} className="product-image-link">
+                      <Link to={`/products/${productId}`} className="product-image-link">
                         <div className="product-image">
                           {imageUrl ? (
                             <img 

@@ -1,6 +1,7 @@
 // Program.cs
 using DotNetEnv;
 using backend.Data;
+using backend.Data.Seed;
 using backend.Services;
 using backend.Services.CRUD;
 using backend.Services.Interfaces;
@@ -65,9 +66,10 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddScoped<IUserCrudService, UserCrudService>();
+builder.Services.AddScoped<IPriceHistoryService, PriceHistoryService>();
 builder.Services.AddScoped<IProductsCrudService, ProductsCrudService>();
 builder.Services.AddScoped<IProductImagesService, ProductImagesService>();
-
+builder.Services.AddScoped<IDiscountsCrudService, DiscountsCrudService>();
 builder.Services.AddScoped<IEmailSender>(_ =>
     new EmailSender(
         smtpServer: Environment.GetEnvironmentVariable("SMTP_SERVER")
@@ -119,6 +121,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DBContext>();
+    await DbInitializer.InitializeAsync(dbContext);
+}
 
 // Включаем Swagger только в Development режиме
 if (app.Environment.IsDevelopment())

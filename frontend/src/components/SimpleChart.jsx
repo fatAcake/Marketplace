@@ -49,61 +49,37 @@ export function SimpleChart({ data, color = '#111', label = '' }) {
 
   const { W, H, pad, cw, ch, pathD, areaD, points, yTicks } = svg
 
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" style={{ width: '100%', maxWidth: W }}>
+return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg">
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+          <stop offset="0%" className="grad-stop-top" />
+          <stop offset="100%" className="grad-stop-bottom" />
         </linearGradient>
       </defs>
 
       {yTicks.map((t, i) => (
-        <g key={i}>
-          <line
-            x1={pad.left}
-            y1={t.y}
-            x2={pad.left + cw}
-            y2={t.y}
-            stroke="var(--gray-400)"
-            strokeWidth="0.5"
-            strokeDasharray="4,4"
-          />
-          <text x={pad.left - 6} y={t.y + 4} textAnchor="end" fontSize="11" fill="#111">
-            {t.v}
-          </text>
+        <g key={i} className="chart-grid-group">
+          <line x1={pad.left} y1={t.y} x2={pad.left + cw} y2={t.y} className="chart-grid-line" />
+          <text x={pad.left - 8} y={t.y + 4} className="chart-tick-text">{t.v}</text>
         </g>
       ))}
 
       {points.map((p, i) => (
-        <text
-          key={i}
-          x={p.x}
-          y={H - 6}
-          textAnchor="middle"
-          fontSize="10"
-          fill="#111"
-          transform={`rotate(-30, ${p.x}, ${H - 6})`}
-        >
+        <text key={i} x={p.x} y={H - 6} className="chart-label-text" transform={`rotate(-30, ${p.x}, ${H - 6})`}>
           {p.label}
         </text>
       ))}
 
-      <path d={areaD} fill="url(#chartGrad)" />
-
-      <path d={pathD} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={areaD} className="chart-area" />
+      <path d={pathD} className="chart-line" />
 
       {points.map((p, i) => (
-        <g key={i}>
-          <circle cx={p.x} cy={p.y} r="4" fill="white" stroke={color} strokeWidth="2" />
-          <title>
-            {p.label}: {p.value}
-          </title>
-        </g>
+        <circle key={i} cx={p.x} cy={p.y} r="4" className="chart-point" />
       ))}
 
       {label && (
-        <text x={12} y={H / 2} textAnchor="middle" fontSize="11" fill="#111" transform={`rotate(-90, 12, ${H / 2})`}>
+        <text x={12} y={H / 2} className="chart-axis-label" transform={`rotate(-90, 12, ${H / 2})`}>
           {label}
         </text>
       )}

@@ -134,65 +134,65 @@ export function ProductDetailPage() {
 
   const priceChartData = priceHistory.length > 0
     ? (() => {
-        const points = []
-        const sorted = [...priceHistory].sort(
-          (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
-        )
-        let currentPrice = null
+      const points = []
+      const sorted = [...priceHistory].sort(
+        (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
+      )
+      let currentPrice = null
 
-        sorted.forEach((h, i) => {
-          const d = new Date(h.changedAt)
-          const label = `${d.getDate()} ${months[d.getMonth()]}`
+      sorted.forEach((h, i) => {
+        const d = new Date(h.changedAt)
+        const label = `${d.getDate()} ${months[d.getMonth()]}`
 
-          if (i === 0 && h.oldPrice != null) {
-            const oldD = new Date(h.changedAt)
-            points.push({
-              label: `${oldD.getDate()} ${months[oldD.getMonth()]}`,
-              value: h.oldPrice,
-            })
-          }
+        if (i === 0 && h.oldPrice != null) {
+          const oldD = new Date(h.changedAt)
+          points.push({
+            label: `${oldD.getDate()} ${months[oldD.getMonth()]}`,
+            value: h.oldPrice,
+          })
+        }
 
-          if (h.newPrice != null) {
-            currentPrice = h.newPrice
-          } else if (h.oldPrice != null && currentPrice == null) {
-            currentPrice = h.oldPrice
-          }
+        if (h.newPrice != null) {
+          currentPrice = h.newPrice
+        } else if (h.oldPrice != null && currentPrice == null) {
+          currentPrice = h.oldPrice
+        }
 
-          if (currentPrice != null) {
-            points.push({ label, value: currentPrice })
-          }
-        })
+        if (currentPrice != null) {
+          points.push({ label, value: currentPrice })
+        }
+      })
 
-        return points.length > 0 ? points : null
-      })()
+      return points.length > 0 ? points : null
+    })()
     : null
 
   const discountChartData = priceHistory.length > 0
     ? (() => {
-        const points = []
-        const sorted = [...priceHistory].sort(
-          (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
-        )
-        let currentDiscount = null
+      const points = []
+      const sorted = [...priceHistory].sort(
+        (a, b) => new Date(a.changedAt) - new Date(b.changedAt)
+      )
+      let currentDiscount = null
 
-        sorted.forEach((h) => {
-          if (h.newDiscount != null) {
-            currentDiscount = h.newDiscount
-          } else if (h.oldDiscount != null && currentDiscount == null) {
-            currentDiscount = h.oldDiscount
-          }
+      sorted.forEach((h) => {
+        if (h.newDiscount != null) {
+          currentDiscount = h.newDiscount
+        } else if (h.oldDiscount != null && currentDiscount == null) {
+          currentDiscount = h.oldDiscount
+        }
 
-          if (currentDiscount != null) {
-            const d = new Date(h.changedAt)
-            points.push({
-              label: `${d.getDate()} ${months[d.getMonth()]}`,
-              value: currentDiscount,
-            })
-          }
-        })
+        if (currentDiscount != null) {
+          const d = new Date(h.changedAt)
+          points.push({
+            label: `${d.getDate()} ${months[d.getMonth()]}`,
+            value: currentDiscount,
+          })
+        }
+      })
 
-        return points.length > 0 ? points : null
-      })()
+      return points.length > 0 ? points : null
+    })()
     : null
 
   const descText = p.description || ''
@@ -204,7 +204,7 @@ export function ProductDetailPage() {
   if (loading) {
     return (
       <section className="product-detail-section">
-        <p className="text-navy">Загрузка...</p>
+        <p className="loading-text">Загрузка...</p>
       </section>
     )
   }
@@ -213,14 +213,14 @@ export function ProductDetailPage() {
     return (
       <section className="product-detail-section">
         <div className="alert error">{error}</div>
-        <Link className="btn btn-back-link" to="/me">← Назад в профиль</Link>
+        <Link className="btn-back-link" to="/me">← Назад в профиль</Link>
       </section>
     )
   }
 
   return (
     <section className="product-detail-section">
-      <Link className="btn btn-back-link" to="/me">← Назад в профиль</Link>
+      <Link className="btn-back-link" to="/me">← Назад в профиль</Link>
 
       {error && <div className="alert error" style={{ marginTop: 12 }}>{error}</div>}
 
@@ -234,7 +234,7 @@ export function ProductDetailPage() {
             />
           ) : (
             <div className="product-detail-placeholder">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" strokeWidth="1">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
@@ -275,12 +275,12 @@ export function ProductDetailPage() {
 
           <div className="product-detail-meta">
             <div className="product-detail-meta-item">
-              <span className="meta-label">В наличии</span>
+              <span className="meta-label">В наличии </span>
               <span className="meta-value">{p.quantity} шт.</span>
             </div>
             <div className="product-detail-meta-item">
-              <span className="meta-label">Продавец</span>
-              <span className="meta-value">{p.sellerNickName || '—'}</span>
+              <span className="meta-label">Продавец </span>
+              <span className="meta-value accent-text">{p.sellerNickName || '—'}</span>
             </div>
           </div>
 
@@ -301,28 +301,28 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {!isOwner && p.quantity > 0 && (
-            <div className="product-detail-actions">
-              <button
-                className="btn btn-primary-navy"
-                onClick={handleAddToCartDetail}
-                disabled={addedFeedback}
-              >
-                {addedFeedback ? '✓ Добавлено' : '🛒 В корзину'}
-              </button>
-            </div>
-          )}
+          <div className="product-detail-actions">
+            {!isOwner && p.quantity > 0 && (
+                <button
+                  className="btn-primary-action"
+                  onClick={handleAddToCartDetail}
+                  disabled={addedFeedback}
+                >
+                  {addedFeedback ? '✓ Добавлено' : 'В корзину'}
+                </button>
+            )}
 
-          {isOwner && (
-            <div className="product-detail-actions">
-              <button className="btn btn-edit" onClick={() => setEditModalOpen(true)}>
-                ✏️ Изменить
-              </button>
-              <button className="btn btn-danger-outline" onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Удаление...' : '🗑 Удалить'}
-              </button>
-            </div>
-          )}
+            {isOwner && (
+              <>
+                <button className="btn-edit-action" onClick={() => setEditModalOpen(true)}>
+                  Изменить
+                </button>
+                <button className="btn-delete-action" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? 'Удаление...' : 'Удалить'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

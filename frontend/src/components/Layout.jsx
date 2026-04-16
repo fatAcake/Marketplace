@@ -75,7 +75,7 @@ export function Layout() {
       <main className="container page">
         {user ? (
           <div className="muted" style={{ marginBottom: 12 }}>
-            Вошли как <span style={{ fontWeight: 700 }}>{user.nickname || user.email}</span>
+            Вы вошли как <span style={{ fontWeight: 700 }}>{user.nickname || user.email}</span>
           </div>
         ) : null}
         <Outlet />

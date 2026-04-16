@@ -14,18 +14,17 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false)
 
   return (
-    <section className="card" style={{ maxWidth: 520, margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>Вход</h2>
+    <section className="auth-card login-card">
+      <h2 className="auth-title">Вход</h2>
 
       {error ? (
-        <div className="alert error" style={{ marginTop: 12 }}>
+        <div className="alert error">
           {error}
         </div>
       ) : null}
 
       <form
-        className="grid"
-        style={{ marginTop: 14 }}
+        className="auth-form"
         onSubmit={async (e) => {
           e.preventDefault()
           setError('')
@@ -40,12 +39,19 @@ export function LoginPage() {
           }
         }}
       >
-        <label>
-          Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" required />
-        </label>
-        <label>
-          Пароль
+        <div className="input-group">
+          <label>Email</label>
+          <input 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            type="email" 
+            autoComplete="email" 
+            required 
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Пароль</label>
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -53,12 +59,13 @@ export function LoginPage() {
             autoComplete="current-password"
             required
           />
-        </label>
-        <div className="row" style={{ marginTop: 6 }}>
-          <button className="btn primary" disabled={busy}>
+        </div>
+
+        <div className="auth-actions">
+          <button className="btn-primary-glow" disabled={busy}>
             {busy ? 'Входим…' : 'Войти'}
           </button>
-          <Link className="btn" to="/register">
+          <Link className="btn-secondary-link" to="/register">
             Регистрация
           </Link>
         </div>
@@ -66,4 +73,3 @@ export function LoginPage() {
     </section>
   )
 }
-

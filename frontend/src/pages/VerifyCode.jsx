@@ -21,23 +21,23 @@ export function VerifyCodePage() {
   }, [email, code])
 
   return (
-    <section className="card" style={{ maxWidth: 560, margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>Подтверждение email</h2>
+    <section className="auth-card verify-card">
+      <h2 className="auth-title">Подтверждение email</h2>
 
       {error ? (
-        <div className="alert error" style={{ marginTop: 12 }}>
+        <div className="alert error">
           {error}
         </div>
       ) : null}
+      
       {ok ? (
-        <div className="alert ok" style={{ marginTop: 12 }}>
+        <div className="alert ok">
           {ok}
         </div>
       ) : null}
 
       <form
-        className="grid"
-        style={{ marginTop: 14 }}
+        className="auth-form"
         onSubmit={async (e) => {
           e.preventDefault()
           setError('')
@@ -54,13 +54,21 @@ export function VerifyCodePage() {
           }
         }}
       >
-        <label>
-          Email
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" required />
-        </label>
-        <label>
-          Код (6 цифр)
+        <div className="input-group">
+          <label>Email</label>
+          <input 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            type="email" 
+            autoComplete="email" 
+            required 
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Код (6 цифр)</label>
           <input
+            className="code-input"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             inputMode="numeric"
@@ -68,14 +76,16 @@ export function VerifyCodePage() {
             placeholder="123456"
             required
           />
-        </label>
-        <div className="row" style={{ marginTop: 6 }}>
-          <button className="btn primary" disabled={busy || !canSubmit}>
+        </div>
+
+        <div className="auth-actions">
+          <button className="btn-primary-glow" disabled={busy || !canSubmit}>
             {busy ? 'Проверяем…' : 'Подтвердить'}
           </button>
+          
           <button
             type="button"
-            className="btn"
+            className="btn-action-outline"
             disabled={busyResend || !email}
             onClick={async () => {
               setError('')
@@ -93,12 +103,12 @@ export function VerifyCodePage() {
           >
             {busyResend ? 'Отправляем…' : 'Отправить код ещё раз'}
           </button>
-          <Link className="btn" to="/login">
-            Вход
+
+          <Link className="btn-secondary-link" to="/login">
+            Вернуться ко входу
           </Link>
         </div>
       </form>
     </section>
   )
 }
-

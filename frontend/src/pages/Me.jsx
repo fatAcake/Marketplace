@@ -87,124 +87,118 @@ export function MePage() {
     return sum + orderSum
   }, 0)
 
-  return (
+return (
     <section className="profile-page">
-      <div className="profile-header">
-        <div className="profile-avatar">
-          {(user?.nickname || user?.email || '?').charAt(0).toUpperCase()}
-        </div>
-        <div className="profile-header-info">
-          <h1 className="profile-name">{user?.nickname || user?.email || 'Пользователь'}</h1>
-          <p className="profile-email">{user?.email}</p>
-          <span className={`profile-badge badge-${userStatus.toLowerCase()}`}>
-            {userStatus || 'Пользователь'}
-          </span>
-        </div>
-        <div className="profile-header-actions">
-          <button
-            className="btn btn-outline"
-            disabled={busy}
-            onClick={async () => {
-              setError('')
-              setBusy(true)
-              try {
-                const me = await authApi.me(token)
-                setUser(me)
-              } catch (e) {
-                setError(e?.message || 'Не удалось обновить профиль')
-              } finally {
-                setBusy(false)
-              }
-            }}
-          >
-            ↻ Обновить
-          </button>
-          <button
-            className="btn btn-danger-outline"
-            disabled={busy}
-            onClick={async () => {
-              await logout()
-              navigate('/login', { replace: true })
-            }}
-          >
-            Выйти
-          </button>
+      <div className="profile-header-card">
+        <div className="profile-header-top">
+          <div className="profile-avatar">
+            {(user?.nickname || user?.email || '?').charAt(0).toUpperCase()}
+          </div>
+          <div className="profile-header-info">
+            <h1 className="profile-name">{user?.nickname || user?.email || 'Пользователь'}</h1>
+            <p className="profile-email">{user?.email}</p>
+            <span className={`profile-badge badge-${userStatus.toLowerCase()}`}>
+              {userStatus || 'Пользователь'}
+            </span>
+          </div>
+          <div className="profile-header-actions">
+            <button
+              className="btn-action-outline"
+              disabled={busy}
+              onClick={async () => {
+                setError('')
+                setBusy(true)
+                try {
+                  const me = await authApi.me(token)
+                  setUser(me)
+                } catch (e) {
+                  setError(e?.message || 'Не удалось обновить профиль')
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              ↻ Обновить
+            </button>
+            <button
+              className="btn-action-danger"
+              disabled={busy}
+              onClick={async () => {
+                await logout()
+                navigate('/login', { replace: true })
+              }}
+            >
+              Выйти
+            </button>
+          </div>
         </div>
       </div>
 
       {error && <div className="alert error">{error}</div>}
 
-      {isSeller ? (
-        <div className="profile-stats-row">
-          <div className="profile-stat-card">
-            <div className="profile-stat-icon"><i className="bi bi-box-seam"></i></div>
-            <div className="profile-stat-value">{totalProducts}</div>
-            <div className="profile-stat-label">Товаров</div>
-          </div>
-          <div className="profile-stat-card">
-            <div className="profile-stat-icon"><i className="bi bi-cash-stack"></i></div>
-            <div className="profile-stat-value">{Math.round(totalValue).toLocaleString('ru-RU')} ₽</div>
-            <div className="profile-stat-label">Общая стоимость</div>
-          </div>
-          <div className="profile-stat-card">
-            <div className="profile-stat-icon"><i className="bi bi-graph-up-arrow"></i></div>
-            <div className="profile-stat-value">{Math.round(avgPrice).toLocaleString('ru-RU')} ₽</div>
-            <div className="profile-stat-label">Средняя цена</div>
-          </div>
-          <button
-            className="profile-stat-card profile-stat-card--clickable"
-            onClick={() => setStatsOpen(true)}
-          >
-            <div className="profile-stat-icon"><i className="bi bi-bar-chart-line"></i></div>
-            <div className="profile-stat-value" style={{ fontSize: 18 }}>Статистика</div>
-            <div className="profile-stat-label">Продажи и цены</div>
-          </button>
-        </div>
-      ) : (
-        <div className="profile-stats-row">
-          <div className="profile-stat-card">
-            <div className="profile-stat-icon"><i className="bi bi-bag-check"></i></div>
-            <div className="profile-stat-value">{totalOrders}</div>
-            <div className="profile-stat-label">Заказов</div>
-          </div>
-          <div className="profile-stat-card">
-            <div className="profile-stat-icon"><i className="bi bi-cash-stack"></i></div>
-            <div className="profile-stat-value">{Math.round(totalOrdersValue).toLocaleString('ru-RU')} ₽</div>
-            <div className="profile-stat-label">Общая сумма</div>
-          </div>
-        </div>
-      )}
+      <div className="profile-stats-row">
+        {isSeller ? (
+          <>
+            <div className="profile-stat-card">
+              <div className="profile-stat-icon"><i class="bi bi-box-seam"></i></div>
+              <div className="profile-stat-value">{totalProducts}</div>
+              <div className="profile-stat-label">Товаров</div>
+            </div>
+            <div className="profile-stat-card">
+              <div className="profile-stat-icon"><i class="bi bi-cash-stack"></i></div>
+              <div className="profile-stat-value">{Math.round(totalValue).toLocaleString('ru-RU')} ₽</div>
+              <div className="profile-stat-label">Общая стоимость</div>
+            </div>
+            <div className="profile-stat-card">
+              <div className="profile-stat-icon"><i class="bi bi-graph-up"></i></div>
+              <div className="profile-stat-value">{Math.round(avgPrice).toLocaleString('ru-RU')} ₽</div>
+              <div className="profile-stat-label">Средняя  цена</div>
+            </div>
+            <button
+              className="profile-stat-card profile-stat-card--clickable"
+              onClick={() => setStatsOpen(true)}
+            >
+              <div className="profile-stat-icon"><i class="bi bi-bar-chart"></i></div>
+              <div className="profile-stat-value" style={{ fontSize: 18 }}>Аналитика</div>
+              <div className="profile-stat-label">Детальные графики</div>
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="profile-stat-card">
+              <div className="profile-stat-icon"><i class="bi bi-bag"></i></div>
+              <div className="profile-stat-value">{totalOrders}</div>
+              <div className="profile-stat-label">Заказов</div>
+            </div>
+            <div className="profile-stat-card">
+              <div className="profile-stat-icon"><i class="bi bi-wallet"></i></div>
+              <div className="profile-stat-value">{Math.round(totalOrdersValue).toLocaleString('ru-RU')} ₽</div>
+              <div className="profile-stat-label">Общая сумма</div>
+            </div>
+          </>
+        )}
+      </div>
 
       {isSeller && (
-        <div className="products-section">
-          <div className="products-header">
+        <div className="profile-content-section">
+          <div className="section-header">
             <h2>Мои товары</h2>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link className="btn btn-sm btn-primary-navy" to="/products/create">
-                + Добавить
+            <div className="header-btns">
+              <Link className="btn-add-product" to="/products/create">
+                + Добавить товар
               </Link>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={loadProducts}
-                disabled={productsLoading}
-              >
-                {productsLoading ? 'Загрузка...' : '↻ Обновить'}
+              <button className="btn-refresh" onClick={loadProducts} disabled={productsLoading}>
+                {productsLoading ? '...' : '↻'}
               </button>
             </div>
           </div>
 
           {productsLoading && products.length === 0 ? (
-            <div className="products-empty">
-              <div className="products-empty-icon"><i className="bi bi-hourglass-split"></i></div>
-              <p>Загрузка товаров...</p>
-            </div>
+            <div className="empty-state">Загрузка товаров...</div>
           ) : products.length === 0 ? (
-            <div className="products-empty">
-              <div className="products-empty-icon"><i className="bi bi-inbox"></i></div>
+            <div className="empty-state">
               <p>У вас пока нет товаров.</p>
-              <Link className="btn btn-primary-navy" to="/products/create">
-                <i className="bi bi-plus-lg me-1"></i>Добавить товар
-              </Link>
+              <Link className="btn-link" to="/products/create">Добавить первый товар</Link>
             </div>
           ) : (
             <div className="products-grid">
@@ -220,30 +214,20 @@ export function MePage() {
         </div>
       )}
 
-      <div className="products-section">
-        <div className="products-header">
-          <h2>Мои заказы</h2>
-          <button
-            className="btn btn-sm btn-outline"
-            onClick={loadOrders}
-            disabled={ordersLoading}
-          >
-            {ordersLoading ? 'Загрузка...' : '↻ Обновить'}
+      <div className="profile-content-section">
+        <div className="section-header">
+          <h2>История заказов</h2>
+          <button className="btn-refresh" onClick={loadOrders} disabled={ordersLoading}>
+            {ordersLoading ? '...' : '↻'}
           </button>
         </div>
 
         {ordersLoading && orders.length === 0 ? (
-          <div className="products-empty">
-            <div className="products-empty-icon"><i className="bi bi-hourglass-split"></i></div>
-            <p>Загрузка заказов...</p>
-          </div>
+          <div className="empty-state">Загрузка заказов...</div>
         ) : orders.length === 0 ? (
-          <div className="products-empty">
-            <div className="products-empty-icon"><i className="bi bi-bag-x"></i></div>
+          <div className="empty-state">
             <p>У вас пока нет заказов.</p>
-            <Link className="btn btn-primary-navy" to="/products">
-              <i className="bi bi-search me-1"></i>Перейти в каталог
-            </Link>
+            <Link className="btn-link" to="/products">Перейти в каталог</Link>
           </div>
         ) : (
           <div className="orders-list">

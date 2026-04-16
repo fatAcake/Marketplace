@@ -1,172 +1,297 @@
+/* Сетка KPI карточек (Верхние показатели) */
+
 .stats-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
 }
 
 .stats-kpi-card {
-  text-align: center;
-  padding: 16px;
-  background: var(--gray-100);
-  border-radius: 10px;
-  border: 1px solid var(--gray-400);
+    text-align: center;
+    padding: 20px;
+    background: #1a1d20;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.2s;
+}
+
+.stats-kpi-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(53, 198, 107, 0.3);
 }
 
 .stats-kpi-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: #111;
+    font-size: 26px;
+    font-weight: 800;
+    color: #35c66b;
+    /* Фирменный зеленый */
+    letter-spacing: -0.5px;
 }
 
 .stats-kpi-label {
-  font-size: 12px;
-  color: #111;
-  opacity: 0.6;
-  margin-top: 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Chart */
+
+/* Секция с графиком */
+
 .stats-chart-section {
-  margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .stats-chart-section h4 {
-  margin: 0 0 12px;
-  color: #111;
-  font-size: 16px;
+    margin: 0 0 16px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 .chart-svg {
-  background: var(--gray-100);
-  border-radius: 10px;
-  border: 1px solid var(--gray-400);
-  padding: 8px;
+    background: #121517;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 20px;
 }
 
-/* Таблица */
+
+/* Стилизация таблиц статистики */
+
 .stats-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: #1a1d20;
+    border-radius: 16px;
+    overflow: hidden;
 }
 
 .stats-table th {
-  text-align: left;
-  padding: 8px 10px;
-  background: var(--gray-400);
-  color: #111;
-  font-weight: 600;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+    text-align: left;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .stats-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--gray-100);
-  color: #111;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .stats-table tr:last-child td {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .stats-table tr:hover td {
-  background: var(--gray-100);
+    background: rgba(53, 198, 107, 0.05);
+    color: #fff;
 }
 
-/* Список товаров (tab «Товары») */
+
+/* Список топовых товаров */
+
 .stats-top-products h4,
 .stats-history-table h4 {
-  margin: 0 0 12px;
-  color: #111;
-  font-size: 16px;
+    margin: 0 0 16px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 .stats-product-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .stats-product-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 14px 16px;
-  background: var(--gray-100);
-  border: 1px solid var(--gray-400);
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s, border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 20px;
+    background: #1a1d20;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .stats-product-item:hover {
-  background: var(--gray-200);
-  border-color: var(--gray-300);
+    background: #212428;
+    border-color: #35c66b;
+    padding-left: 24px;
+    /* Эффект смещения при наведении */
 }
 
 .stats-product-name {
-  font-weight: 600;
-  color: #111;
-  font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 16px;
 }
 
 .stats-product-meta {
-  font-size: 12px;
-  color: #111;
-  opacity: 0.6;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
+
 /* ========================================
-   BAR CHART (горизонтальные полосы)
+   BAR CHART (Горизонтальные полосы)
    ======================================== */
+
 .bar-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .bar-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .bar-label {
-  min-width: 100px;
-  max-width: 140px;
-  font-size: 13px;
-  color: #111;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    min-width: 110px;
+    max-width: 150px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bar-track {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--gray-100);
-  border-radius: 6px;
-  padding: 4px 8px;
-  min-height: 28px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 6px 12px;
+    min-height: 36px;
 }
 
 .bar-fill {
-  height: 20px;
-  border-radius: 4px;
-  min-width: 4px;
-  transition: width 0.4s ease;
+    height: 10px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #1e3932, #35c66b);
+    min-width: 6px;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bar-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111;
-  white-space: nowrap;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+}
+
+
+/* Общие текстовые состояния */
+
+.stats-empty-text {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+}
+
+
+/* Стили для BarChart (Полосы) */
+
+.bar-fill {
+    height: 12px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #1e3932, #35c66b);
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* Стили для SimpleChart (SVG) */
+
+.chart-svg {
+    width: 100%;
+    max-width: 500px;
+    background: #121517;
+    border-radius: 20px;
+    display: block;
+}
+
+.chart-line {
+    fill: none;
+    stroke: #35c66b;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.chart-area {
+    fill: url(#chartGrad);
+}
+
+.grad-stop-top {
+    stop-color: #35c66b;
+    stop-opacity: 0.4;
+}
+
+.grad-stop-bottom {
+    stop-color: #35c66b;
+    stop-opacity: 0;
+}
+
+.chart-grid-line {
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+    stroke-dasharray: 4, 4;
+}
+
+.chart-tick-text,
+.chart-label-text {
+    fill: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+    text-anchor: end;
+}
+
+.chart-label-text {
+    text-anchor: middle;
+}
+
+.chart-point {
+    fill: #121517;
+    stroke: #35c66b;
+    stroke-width: 2;
+}
+
+.chart-axis-label {
+    fill: #35c66b;
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+
+
+/* Кнопка "Назад" в модалке */
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.1);
 }

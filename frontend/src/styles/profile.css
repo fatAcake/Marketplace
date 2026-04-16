@@ -1,114 +1,212 @@
 .profile-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--text-white);
 }
 
-/* — Шапка профиля — */
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 24px;
-  border-radius: 16px;
-  background: var(--gray-200);
-  border: 1px solid var(--gray-300);
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+
+/* Шапка профиля */
+
+.profile-header-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 30px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.profile-header-top {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex-wrap: wrap;
 }
 
 .profile-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #111;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-  flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: var(--accent-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    box-shadow: 0 10px 20px rgba(53, 198, 107, 0.3);
 }
 
 .profile-header-info {
-  flex: 1;
-  min-width: 160px;
+    flex: 1;
+    min-width: 200px;
 }
 
 .profile-name {
-  margin: 0;
-  font-size: 22px;
-  color: #111;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-white);
 }
 
 .profile-email {
-  margin: 2px 0 6px;
-  color: #111;
-  opacity: 0.7;
-  font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 5px 0 12px;
 }
 
 .profile-badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--gray-100);
-  color: #111;
-  border: 1px solid var(--gray-400);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(53, 198, 107, 0.1);
+    color: #35c66b;
+    border: 1px solid rgba(53, 198, 107, 0.2);
 }
 
 .profile-header-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+    display: flex;
+    gap: 10px;
 }
 
-/* — Статистика — */
+
+/* Статистика */
+
 .profile-stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 40px;
 }
 
 .profile-stat-card {
-  background: var(--gray-100);
-  border: 1px solid var(--gray-400);
-  border-radius: 12px;
-  padding: 18px 16px;
-  text-align: center;
-  cursor: default;
-  transition: transform 0.15s, box-shadow 0.15s;
+    background: #1a1d20;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 .profile-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(53, 198, 107, 0.3);
+    transform: translateY(-5px);
+    background: #1e2225;
 }
 
 .profile-stat-card--clickable {
-  cursor: pointer;
-  background: var(--gray-300);
-  border-color: var(--gray-300);
+    cursor: pointer;
+    background: rgba(53, 198, 107, 0.05);
+    border: 1px solid rgba(53, 198, 107, 0.2);
+}
+
+.profile-stat-card--clickable:hover {
+    background: rgba(53, 198, 107, 0.1);
 }
 
 .profile-stat-icon {
-  font-size: 24px;
-  margin-bottom: 6px;
+    font-size: 28px;
+    margin-bottom: 10px;
 }
 
 .profile-stat-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: #111;
+    font-size: 24px;
+    font-weight: 800;
+    color: #35c66b;
 }
 
 .profile-stat-label {
-  font-size: 12px;
-  color: #111;
-  opacity: 0.7;
-  margin-top: 2px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 5px;
+}
+
+
+/* Секции контента */
+
+.profile-content-section {
+    margin-bottom: 50px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.section-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.header-btns {
+    display: flex;
+    gap: 10px;
+}
+
+
+/* Кнопки */
+
+.btn-action-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-action-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-action-danger {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-add-product {
+    background: #35c66b;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-refresh {
+    background: #1a1d20;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-link {
+    color: #35c66b;
+    text-decoration: underline;
+    margin-top: 10px;
+    display: inline-block;
 }

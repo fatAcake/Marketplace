@@ -420,7 +420,8 @@ CONNECTION_STRING=Host=localhost;Port=5432;Database=Marketplace;Username=postgre
 dotnet restore
 dotnet ef database update
 ```
-
+4.1 Если нужны деманстрационные данные 
+   нужно расскомментировать строки 145-147 в backend/backend/Program.cs
 5. Запустите backend:
 
 ```bash

@@ -10,4 +10,4 @@ SMTP_SERVER="smtp.gmail.com"
 SMTP_PORT=587
 
 # Database
-CONNECTION_STRING=Host=Host=localhost;Port=5432;Database=Marketplace;Username=postgres;Password=you_password
+CONNECTION_STRING=Host=localhost;Port=5432;Database=Marketplace;Username=postgres;Password=you_password
